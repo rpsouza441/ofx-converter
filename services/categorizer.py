@@ -49,28 +49,54 @@ class TransactionCategorizer:
             'Saúde': ['farmacia', 'farmácia', 'medicamento']
         }
     
-    def categorize(self, description: str, amount: float, trn_type: str = None) -> str:
+    def categorize_smart(self, description: str, amount: float) -> dict:
         """
-        Categoriza uma transação
+        Categoriza transação automaticamente (transferência, receita ou despesa)
         
         Args:
             description: Descrição da transação (já normalizada)
             amount: Valor (positivo = entrada, negativo = saída)
-            trn_type: Tipo OFX (CREDIT/DEBIT) - opcional
             
         Returns:
-            Nome da categoria
+            Dict com type, category, subcategory:
+            {
+                'type': 'transfer' | 'income' | 'expense',
+                'category': str,
+                'subcategory': str
+            }
         """
         description_lower = description.lower()
         
+        # 1. Primeiro verifica se é transferência (via YAML transferencias)
+        for rule in self.transfer_rules:
+            if any(keyword in description_lower for keyword in rule['keywords']):
+                return {
+                    'type': 'transfer',
+                    'category': rule['category'],
+                    'subcategory': rule['subcategory']
+                }
+        
+        # 2. Se não for transferência, categoriza como receita/despesa
         if amount > 0:
-            # Entrada de dinheiro
             category = self._match_category(description_lower, self.income_rules)
-            return category if category else 'Outras Receitas'
+            return {
+                'type': 'income',
+                'category': category or 'Outras Receitas',
+                'subcategory': ''
+            }
         else:
-            # Saída de dinheiro
             category = self._match_category(description_lower, self.expense_rules)
-            return category if category else 'Outras Despesas'
+            return {
+                'type': 'expense',
+                'category': category or 'Outras Despesas',
+                'subcategory': ''
+            }
+    
+    def _deprecated_categorize(self, description: str, amount: float, trn_type: str = None) -> str:
+        """
+        DEPRECATED: Use categorize_smart() instead
+        """
+        raise DeprecationWarning("Use categorize_smart() instead of categorize()")
     
     def _match_category(self, description: str, rules: Dict[str, List[str]]) -> str:
         """Encontra categoria que contém alguma palavra-chave"""
@@ -104,24 +130,11 @@ class TransactionCategorizer:
         })
         logger.info(f"Regra de transferência adicionada: {category} > {subcategory}")
     
-    def categorize_transfer(self, description: str) -> tuple:
+    def _deprecated_categorize_transfer(self, description: str) -> tuple:
         """
-        Categoriza uma transferência
-        
-        Args:
-            description: Descrição da transferência (já normalizada)
-            
-        Returns:
-            Tupla (categoria, subcategoria)
+        DEPRECATED: Use categorize_smart() instead
         """
-        description_lower = description.lower()
-        
-        for rule in self.transfer_rules:
-            if any(keyword in description_lower for keyword in rule['keywords']):
-                return (rule['category'], rule['subcategory'])
-        
-        # Fallback padrão
-        return ('Transferência Geral', 'Transferência Bancária')
+        raise DeprecationWarning("Use categorize_smart() instead of categorize_transfer()")
     
     def load_rules_from_file(self, file_path: str):
         """

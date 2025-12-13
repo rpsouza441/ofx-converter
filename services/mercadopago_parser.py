@@ -190,7 +190,7 @@ class MercadoPagoParser:
     
     def _categorize_transaction(self, description: str, amount: float) -> dict:
         """
-        Categoriza transação com detecção especial para transferências Pix
+        Categoriza transação usando categorize_smart do categorizer
         
         Args:
             description: Descrição da transação
@@ -199,35 +199,18 @@ class MercadoPagoParser:
         Returns:
             Dict com type, category, subcategory, qif_category
         """
-        description_lower = description.lower()
+        # Usar categorize_smart que detecta tudo via YAML
+        cat_info = self.categorizer.categorize_smart(description, amount)
         
-        # Detectar transferências Pix
-        if 'transferência pix' in description_lower or 'transferencia pix' in description_lower:
-            category, subcategory = self.categorizer.categorize_transfer(description)
-            return {
-                'type': 'transfer',
-                'category': category,
-                'subcategory': subcategory,
-                'qif_category': '[Transferências]'  # QIF usa bracket notation
-            }
-        
-        # Para outras transações, usar categorizador normal
-        category = self.categorizer.categorize(description, amount)
-        
-        if amount > 0:
-            return {
-                'type': 'income',
-                'category': category,
-                'subcategory': '',
-                'qif_category': category
-            }
+        # Adicionar qif_category para compatibilidade QIF
+        if cat_info['type'] == 'transfer':
+            # QIF usa bracket notation para transferências
+            cat_info['qif_category'] = f"[{cat_info['category']}]"
         else:
-            return {
-                'type': 'expense',
-                'category': category,
-                'subcategory': '',
-                'qif_category': category
-            }
+            # QIF usa categoria normal
+            cat_info['qif_category'] = cat_info['category']
+        
+        return cat_info
     
     def get_date_for_filename(self, file_path: Path) -> Optional[str]:
         """

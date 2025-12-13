@@ -105,10 +105,16 @@ transferencias:
       - transferência pix recebida
       - transferencia pix enviada
       - transferencia pix recebida
+      - transacao pix enviada
+      - transacao pix recebida
+      - transação pix enviada
+      - transação pix recebida
   
   - categoria: Transferência Geral
     subcategoria: Transferência Cancelada
     palavras:
       - transferência cancelada
       - transferencia cancelada
+      - transacao cancelada
+      - transação cancelada
 
