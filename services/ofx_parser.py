@@ -75,14 +75,17 @@ class OFXParser:
                     # Limpar descricao
                     description = self.text_normalizer.clean_memo(description)
                     
-                    # Categorizar
-                    category = self.categorizer.categorize(description, txn.amount)
+                    # Detectar transferências e categorizar
+                    cat_info = self._categorize_ofx_transaction(description, txn.amount)
                     
                     transactions.append({
                         'date': date,
                         'amount': amount,
                         'description': description,
-                        'category': category
+                        'type': cat_info['type'],
+                        'category': cat_info['category'],
+                        'subcategory': cat_info['subcategory'],
+                        'qif_category': cat_info['qif_category']
                     })
             
             logger.info(f"Parse ofxparse concluido: {len(transactions)} transacoes")
@@ -169,14 +172,17 @@ class OFXParser:
                 # Limpar descricao
                 description = self.text_normalizer.clean_memo(description)
                 
-                # Categorizar
-                category = self.categorizer.categorize(description, amount)
+                # Detectar transferências e categorizar
+                cat_info = self._categorize_ofx_transaction(description, amount)
                 
                 transactions.append({
                     'date': formatted_date,
                     'amount': amount_str,
                     'description': description,
-                    'category': category
+                    'type': cat_info['type'],
+                    'category': cat_info['category'],
+                    'subcategory': cat_info['subcategory'],
+                    'qif_category': cat_info['qif_category']
                 })
             
             logger.info(f"Parse regex concluido: {len(transactions)} transacoes")
@@ -185,3 +191,47 @@ class OFXParser:
         except Exception as e:
             logger.error(f"Erro no parse regex: {e}")
             return None
+    
+    def _categorize_ofx_transaction(self, description: str, amount: float) -> dict:
+        """
+        Categoriza transação OFX com detecção de transferências
+        
+        Args:
+            description: Descrição da transação
+            amount: Valor da transação
+            
+        Returns:
+            Dict com type, category, subcategory, qif_category
+        """
+        description_lower = description.lower()
+        
+        # Detectar transferências (TED, DOC, Pix enviado/recebido)
+        transfer_keywords = ['transferência', 'transferencia', 'ted enviada', 'ted recebida',
+                            'doc enviado', 'doc recebido', 'pix enviado', 'pix recebida']
+        
+        if any(keyword in description_lower for keyword in transfer_keywords):
+            category, subcategory = self.categorizer.categorize_transfer(description)
+            return {
+                'type': 'transfer',
+                'category': category,
+                'subcategory': subcategory,
+                'qif_category': f'[{category}]'  # QIF usa bracket notation
+            }
+        
+        # Para outras transações, usar categorizador normal
+        category = self.categorizer.categorize(description, amount)
+        
+        if amount > 0:
+            return {
+                'type': 'income',
+                'category': category,
+                'subcategory': '',
+                'qif_category': category
+            }
+        else:
+            return {
+                'type': 'expense',
+                'category': category,
+                'subcategory': '',
+                'qif_category': category
+            }

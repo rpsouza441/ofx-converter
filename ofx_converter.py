@@ -88,7 +88,7 @@ class OFXConverter:
     
     def convert_file(self, ofx_file: Path) -> bool:
         """
-        Converte um arquivo OFX para QIF
+        Converte um arquivo OFX para CSV ezBookkeeping + QIF
         
         Args:
             ofx_file: Path do arquivo OFX
@@ -107,12 +107,16 @@ class OFXConverter:
             lido_month_folder = self.create_month_folder(self.lido_dir, month_year)
             convertido_month_folder = self.create_month_folder(self.convertido_dir, month_year)
             
-            # Caminho do QIF
-            qif_filename = ofx_file.stem + '.qif'
+            # Nomes dos arquivos de saída
+            base_filename = ofx_file.stem
+            csv_filename = f'{base_filename}.csv'
+            qif_filename = f'{base_filename}.qif'
+            
+            csv_path = convertido_month_folder / csv_filename
             qif_path = convertido_month_folder / qif_filename
             
             # Converter - tentar com biblioteca ofxparse primeiro
-            logger.info(f"Convertendo: {ofx_file.name} -> {month_year}/{qif_filename}")
+            logger.info(f"Convertendo OFX: {ofx_file.name} -> {month_year}/{csv_filename} + {qif_filename}")
             
             transactions = self.ofx_parser.parse_with_ofxparse(ofx_file)
             
@@ -122,27 +126,60 @@ class OFXConverter:
                 transactions = self.ofx_parser.parse_with_regex(content)
             
             if transactions:
-                # Escrever QIF
-                writer = QIFWriter()
-                writer.create_qif_file(qif_path)
+                # ====== ESCREVER CSV ======
+                csv_writer = EZBookkeepingCSVWriter()
+                csv_writer.create_csv_file(csv_path)
                 
                 for txn in transactions:
-                    writer.write_transaction(
+                    if txn['type'] == 'transfer':
+                        csv_writer.write_transfer(
+                            txn['date'],
+                            txn['amount'],
+                            txn['description'],
+                            txn['category'],
+                            txn['subcategory']
+                        )
+                    elif txn['type'] == 'expense':
+                        csv_writer.write_expense(
+                            txn['date'],
+                            txn['amount'],
+                            txn['description'],
+                            txn['category'],
+                            txn['subcategory']
+                        )
+                    elif txn['type'] == 'income':
+                        csv_writer.write_income(
+                            txn['date'],
+                            txn['amount'],
+                            txn['description'],
+                            txn['category'],
+                            txn['subcategory']
+                        )
+                
+                csv_writer.close()
+                logger.info(f"CSV ezBookkeeping salvo em: {csv_path}")
+                
+                # ====== ESCREVER QIF ======
+                qif_writer = QIFWriter()
+                qif_writer.create_qif_file(qif_path)
+                
+                for txn in transactions:
+                    qif_writer.write_transaction(
                         txn['date'],
                         txn['amount'],
                         txn['description'],
-                        txn['category']
+                        txn['qif_category']
                     )
                 
-                writer.close()
+                qif_writer.close()
+                logger.info(f"QIF salvo em: {qif_path}")
                 
                 # Mover arquivo para lido
                 lido_path = lido_month_folder / ofx_file.name
                 shutil.move(str(ofx_file), str(lido_path))
                 
                 logger.info(f"Conversao bem-sucedida: {ofx_file.name}")
-                logger.info(f"Arquivo movido para: {lido_path}")
-                logger.info(f"QIF salvo em: {qif_path}")
+                logger.info(f"Arquivo original movido para: {lido_path}")
                 logger.info(f"Organizados na pasta: {month_year}")
                 return True
             else:
