@@ -1,0 +1,32 @@
+services:
+  ofx-converter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ofx-converter
+    volumes:
+      # Mapear pastas locais para o container
+      - "./entrada:/app/entrada"
+      - "./entrada/lido:/app/entrada/lido" 
+      - "./convertido:/app/convertido"
+      # Logs para debug
+      - "./logs:/app/logs"
+    environment:
+      - TZ=America/Sao_Paulo
+      - WATCH_INTERVAL=5  # Intervalo em segundos para verificar novos arquivos
+    restart: unless-stopped
+
+    # Healthcheck para verificar se o container está funcionando
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os; print('OK' if os.path.exists('/app/ofx_converter.py') else 'FAIL')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+# Volumes nomeados opcionais
+volumes:
+  entrada_data:
+    name: ofx-converter-entrada
+  convertido_data:
+    name: ofx-converter-convertido

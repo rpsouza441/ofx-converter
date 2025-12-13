@@ -1,0 +1,29 @@
+# Pastas de dados
+entrada/
+convertido/
+logs/
+
+# Arquivos temporários
+*.tmp
+*.log
+*.bak
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

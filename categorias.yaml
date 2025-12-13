@@ -1,0 +1,88 @@
+# Regras de Categorização - OFX Converter
+# Este arquivo define as regras de categorização de transações
+# Edite este arquivo para adicionar/modificar categorias SEM alterar o código Python
+
+receitas:
+  - categoria: Dividendos
+    palavras: 
+      - dividendo
+      - div
+      - provento
+      - rendimento
+  
+  - categoria: Salário
+    palavras:
+      - salario
+      - salário
+      - ord empregador
+      - salario ord
+  
+  - categoria: Receitas
+    palavras:
+      - pix
+      -ted
+      - doc
+      - receita
+      - recebida
+      - transacao recebida
+  
+  - categoria: Estornos
+    palavras:
+      - estorno
+      - devolucao
+      - devolução
+      - reembolso
+
+despesas:
+  - categoria: Taxas e Tarifas
+    palavras:
+      - taxa
+      - tarifa
+      - custo
+      - anuidade
+  
+  - categoria: Boletos
+    palavras:
+      - boleto
+      - pagamento de boleto
+  
+  - categoria: Transferências
+    palavras:
+      - pix
+      - ted
+      - doc
+      - enviado
+      - enviada
+  
+  - categoria: Alimentação
+    palavras:
+      - supermercado
+      - alimentacao
+      - alimentação
+      - restaurante
+      - lanche
+      - ifood
+      - uber eats
+  
+  - categoria: Combustível
+    palavras:
+      - combustivel
+      - combustível
+      - gasolina
+      - posto
+      - etanol
+  
+  - categoria: Saúde
+    palavras:
+      - farmacia
+      - farmácia
+      - medicamento
+      - hospital
+      - medico
+      - médico
+  
+  # Adicione suas próprias categorias aqui:
+  # - categoria: Nome da Categoria
+  #   palavras:
+  #     - palavra1
+  #     - palavra2
