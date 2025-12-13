@@ -13,6 +13,7 @@ from services.qif_writer import QIFWriter
 from services.ofx_parser import OFXParser
 from services.file_validator import FileValidator
 from services.mercadopago_parser import MercadoPagoParser
+from services.ezbookkeeping_csv_writer import EZBookkeepingCSVWriter
 
 __all__ = [
     'OFXFileReader',
@@ -22,7 +23,8 @@ __all__ = [
     'QIFWriter',
     'OFXParser',
     'FileValidator',
-    'MercadoPagoParser'
+    'MercadoPagoParser',
+    'EZBookkeepingCSVWriter'
 ]
 
 __version__ = '3.0.0'

@@ -26,9 +26,16 @@ ENV/
 # Application directories (dados processados)
 entrada/*.ofx
 entrada/*.qfx
+entrada/*.csv
 entrada/lido/
 convertido/
 logs/
+
+# Arquivos de dados na raiz (não commitar)
+/*.csv
+/*.qif
+/*.ofx
+/*.qfx
 
 # Docker
 .env

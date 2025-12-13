@@ -9,6 +9,7 @@ receitas:
       - div
       - provento
       - rendimento
+      - rendimentos
   
   - categoria: Salário
     palavras:
@@ -19,9 +20,6 @@ receitas:
   
   - categoria: Receitas
     palavras:
-      - pix
-      - ted
-      - doc
       - receita
       - recebida
       - transacao recebida
@@ -46,14 +44,6 @@ despesas:
       - boleto
       - pagamento de boleto
   
-  - categoria: Transferências
-    palavras:
-      - pix
-      - ted
-      - doc
-      - enviado
-      - enviada
-  
   - categoria: Alimentação
     palavras:
       - supermercado
@@ -62,7 +52,26 @@ despesas:
       - restaurante
       - lanche
       - ifood
+      - ifd
       - uber eats
+      - comida
+  
+  - categoria: Compras Online
+    palavras:
+      - amazon
+      - marketplace
+      - magalupay
+      - shopee
+      - mercado livre
+      - mercadopago ip
+      - pix marketplace
+  
+  - categoria: Compras Varejo
+    palavras:
+      - shpp brasil
+      - jesmond comercio
+      - comercio varejista
+      - pagamento com qr pix
   
   - categoria: Combustível
     palavras:
@@ -86,3 +95,20 @@ despesas:
   #   palavras:
   #     - palavra1
   #     - palavra2
+
+# Transferências entre contas
+transferencias:
+  - categoria: Transferência Geral
+    subcategoria: Transferência Bancária
+    palavras:
+      - transferência pix enviada
+      - transferência pix recebida
+      - transferencia pix enviada
+      - transferencia pix recebida
+  
+  - categoria: Transferência Geral
+    subcategoria: Transferência Cancelada
+    palavras:
+      - transferência cancelada
+      - transferencia cancelada
+

@@ -24,6 +24,7 @@ class TransactionCategorizer:
         """
         self.income_rules = self._get_default_income_rules()
         self.expense_rules = self._get_default_expense_rules()
+        self.transfer_rules = []  # Lista de dicts com {keywords, category, subcategory}
         
         if rules_file and Path(rules_file).exists():
             self.load_rules_from_file(rules_file)
@@ -94,6 +95,34 @@ class TransactionCategorizer:
             self.expense_rules[category] = keywords
         logger.info(f"Regra de despesa adicionada: {category}")
     
+    def add_transfer_rule(self, category: str, subcategory: str, keywords: List[str]):
+        """Adiciona regra de transferência"""
+        self.transfer_rules.append({
+            'category': category,
+            'subcategory': subcategory,
+            'keywords': keywords
+        })
+        logger.info(f"Regra de transferência adicionada: {category} > {subcategory}")
+    
+    def categorize_transfer(self, description: str) -> tuple:
+        """
+        Categoriza uma transferência
+        
+        Args:
+            description: Descrição da transferência (já normalizada)
+            
+        Returns:
+            Tupla (categoria, subcategoria)
+        """
+        description_lower = description.lower()
+        
+        for rule in self.transfer_rules:
+            if any(keyword in description_lower for keyword in rule['keywords']):
+                return (rule['category'], rule['subcategory'])
+        
+        # Fallback padrão
+        return ('Transferência Geral', 'Transferência Bancária')
+    
     def load_rules_from_file(self, file_path: str):
         """
         Carrega regras de arquivo YAML
@@ -125,6 +154,14 @@ class TransactionCategorizer:
                     category = rule['categoria']
                     keywords = rule['palavras']
                     self.add_expense_rule(category, keywords)
+            
+            # Carregar transferências
+            if 'transferencias' in rules:
+                for rule in rules['transferencias']:
+                    category = rule['categoria']
+                    subcategory = rule.get('subcategoria', '')
+                    keywords = rule['palavras']
+                    self.add_transfer_rule(category, subcategory, keywords)
             
             logger.info(f"Regras carregadas de: {file_path}")
             

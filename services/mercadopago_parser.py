@@ -136,13 +136,16 @@ class MercadoPagoParser:
             amount = self._convert_amount(amount_str)
             
             # Determinar categoria (com detecção de transferências Pix)
-            category = self._categorize_transaction(description, amount)
+            cat_info = self._categorize_transaction(description, amount)
             
             return {
                 'date': date,
                 'amount': str(amount),
                 'description': description,
-                'category': category
+                'type': cat_info['type'],
+                'category': cat_info['category'],
+                'subcategory': cat_info['subcategory'],
+                'qif_category': cat_info['qif_category']
             }
             
         except Exception as e:
@@ -185,7 +188,7 @@ class MercadoPagoParser:
             logger.warning(f"Valor inválido: {amount_str}, usando 0.00")
             return 0.0
     
-    def _categorize_transaction(self, description: str, amount: float) -> str:
+    def _categorize_transaction(self, description: str, amount: float) -> dict:
         """
         Categoriza transação com detecção especial para transferências Pix
         
@@ -194,17 +197,37 @@ class MercadoPagoParser:
             amount: Valor da transação
             
         Returns:
-            Nome da categoria ou [Transferências] para Pix
+            Dict com type, category, subcategory, qif_category
         """
         description_lower = description.lower()
         
-        # Detectar transferências Pix usando formato QIF bracket notation
-        # Isso fará o ezBookkeeping reconhecer como transferência!
+        # Detectar transferências Pix
         if 'transferência pix' in description_lower or 'transferencia pix' in description_lower:
-            return '[Transferências]'
+            category, subcategory = self.categorizer.categorize_transfer(description)
+            return {
+                'type': 'transfer',
+                'category': category,
+                'subcategory': subcategory,
+                'qif_category': '[Transferências]'  # QIF usa bracket notation
+            }
         
         # Para outras transações, usar categorizador normal
-        return self.categorizer.categorize(description, amount)
+        category = self.categorizer.categorize(description, amount)
+        
+        if amount > 0:
+            return {
+                'type': 'income',
+                'category': category,
+                'subcategory': '',
+                'qif_category': category
+            }
+        else:
+            return {
+                'type': 'expense',
+                'category': category,
+                'subcategory': '',
+                'qif_category': category
+            }
     
     def get_date_for_filename(self, file_path: Path) -> Optional[str]:
         """
