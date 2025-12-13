@@ -90,6 +90,40 @@ class DateExtractor:
             logger.warning(f"Erro ao extrair data do nome: {e}")
             return datetime.now().strftime('%m-%Y')
     
+    def extract_month_year_from_transactions(self, dates: list) -> str:
+        """
+        Extrai mes-ano mais frequente de uma lista de datas
+        
+        Args:
+            dates: Lista de datas no formato YYYY-MM-DD
+            
+        Returns:
+            String no formato 'MM-YYYY' do mes mais frequente
+        """
+        try:
+            month_year_counts = {}
+            
+            for date_str in dates:
+                try:
+                    # Parse YYYY-MM-DD
+                    date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+                    month_year = date_obj.strftime('%m-%Y')
+                    month_year_counts[month_year] = month_year_counts.get(month_year, 0) + 1
+                except:
+                    continue
+            
+            # Usar o mes-ano mais frequente
+            if month_year_counts:
+                most_common = max(month_year_counts.items(), key=lambda x: x[1])
+                return most_common[0]
+            
+            # Fallback: mes atual
+            return datetime.now().strftime('%m-%Y')
+            
+        except Exception as e:
+            logger.warning(f"Erro ao extrair mes-ano de transacoes: {e}")
+            return datetime.now().strftime('%m-%Y')
+    
     def parse_ofx_date(self, date_str: str) -> str:
         """
         Parse data do OFX (YYYYMMDD) para formato YYYY-MM-DD
