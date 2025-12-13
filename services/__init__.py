@@ -12,6 +12,7 @@ from services.categorizer import TransactionCategorizer
 from services.qif_writer import QIFWriter
 from services.ofx_parser import OFXParser
 from services.file_validator import FileValidator
+from services.mercadopago_parser import MercadoPagoParser
 
 __all__ = [
     'OFXFileReader',
@@ -20,7 +21,8 @@ __all__ = [
     'TransactionCategorizer',
     'QIFWriter',
     'OFXParser',
-    'FileValidator'
+    'FileValidator',
+    'MercadoPagoParser'
 ]
 
 __version__ = '3.0.0'
