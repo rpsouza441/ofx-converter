@@ -22,31 +22,14 @@ class TransactionCategorizer:
         Args:
             rules_file: Caminho para arquivo de regras (YAML/dict)
         """
-        self.income_rules = self._get_default_income_rules()
-        self.expense_rules = self._get_default_expense_rules()
+        self.income_rules = []  # Lista de dicts com {keywords, category, subcategory}
+        self.expense_rules = []  # Lista de dicts com {keywords, category, subcategory}
         self.transfer_rules = []  # Lista de dicts com {keywords, category, subcategory}
         
         if rules_file and Path(rules_file).exists():
             self.load_rules_from_file(rules_file)
     
-    def _get_default_income_rules(self) -> Dict[str, List[str]]:
-        """Regras padrão para receitas"""
-        return {
-            'Dividendos': ['dividendo', 'div', 'provento', 'rendimento'],
-            'Salário': ['salário', 'salario', 'ord empregador', 'salario ord'],
-            'Receitas': ['pix', 'ted', 'doc', 'receita', 'recebida'],
-            'Estornos': ['estorno', 'devolucao', 'devolução', 'reembolso']
-        }
-    
-    def _get_default_expense_rules(self) -> Dict[str, List[str]]:
-        """Regras padrão para despesas"""
-        return {
-            'Taxas e Tarifas': ['taxa', 'tarifa', 'custo', 'anuidade'],
-            'Boletos': ['boleto', 'pagamento de boleto'],
-            'Alimentação': ['supermercado', 'alimentacao', 'alimentação', 'restaurante', 'lanche'],
-            'Combustível': ['combustivel', 'combustível', 'gasolina', 'posto'],
-            'Saúde': ['farmacia', 'farmácia', 'medicamento']
-        }
+    # Regras padrão removidas - tudo vem do YAML agora
     
     def categorize_smart(self, description: str, amount: float) -> dict:
         """
@@ -83,18 +66,32 @@ class TransactionCategorizer:
         
         # 2. Se não for transferência, categoriza como receita/despesa
         if amount > 0:
-            category = self._match_category(description_lower, self.income_rules)
+            for rule in self.income_rules:
+                if any(keyword in description_lower for keyword in rule['keywords']):
+                    return {
+                        'type': 'income',
+                        'category': rule['category'],
+                        'subcategory': rule.get('subcategory', '')
+                    }
+            # Fallback
             return {
                 'type': 'income',
-                'category': category or 'Outras Receitas',
-                'subcategory': ''
+                'category': 'Receitas',
+                'subcategory': 'Outras Receitas'
             }
         else:
-            category = self._match_category(description_lower, self.expense_rules)
+            for rule in self.expense_rules:
+                if any(keyword in description_lower for keyword in rule['keywords']):
+                    return {
+                        'type': 'expense',
+                        'category': rule['category'],
+                        'subcategory': rule.get('subcategory', '')
+                    }
+            # Fallback
             return {
                 'type': 'expense',
-                'category': category or 'Outras Despesas',
-                'subcategory': ''
+                'category': 'Despesas',
+                'subcategory': 'Outras Despesas'
             }
     
     def _deprecated_categorize(self, description: str, amount: float, trn_type: str = None) -> str:
@@ -103,28 +100,32 @@ class TransactionCategorizer:
         """
         raise DeprecationWarning("Use categorize_smart() instead of categorize()")
     
-    def _match_category(self, description: str, rules: Dict[str, List[str]]) -> str:
-        """Encontra categoria que contém alguma palavra-chave"""
-        for category, keywords in rules.items():
-            if any(keyword in description for keyword in keywords):
-                return category
-        return None
-    
-    def add_income_rule(self, category: str, keywords: List[str]):
+    def add_income_rule(self, category: str, subcategory: str, keywords: List[str]):
         """Adiciona regra de receita"""
-        if category in self.income_rules:
-            self.income_rules[category].extend(keywords)
-        else:
-            self.income_rules[category] = keywords
-        logger.info(f"Regra de receita adicionada: {category}")
+        self.income_rules.append({
+            'category': category,
+            'subcategory': subcategory,
+            'keywords': keywords
+        })
+        logger.info(f"Regra de receita adicionada: {category} > {subcategory}")
     
-    def add_expense_rule(self, category: str, keywords: List[str]):
+    def _deprecated_add_income_rule_old(self, category: str, keywords: List[str]):
+        """DEPRECATED"""
+        if category in {}:
+            pass
+    
+    def add_expense_rule(self, category: str, subcategory: str, keywords: List[str]):
         """Adiciona regra de despesa"""
-        if category in self.expense_rules:
-            self.expense_rules[category].extend(keywords)
-        else:
-            self.expense_rules[category] = keywords
-        logger.info(f"Regra de despesa adicionada: {category}")
+        self.expense_rules.append({
+            'category': category,
+            'subcategory': subcategory,
+            'keywords': keywords
+        })
+        logger.info(f"Regra de despesa adicionada: {category} > {subcategory}")
+    
+    def _deprecated_add_expense_rule_old(self, category: str, keywords: List[str]):
+        """DEPRECATED"""
+        pass
     
     def add_transfer_rule(self, category: str, subcategory: str, keywords: List[str]):
         """Adiciona regra de transferência"""
@@ -163,15 +164,17 @@ class TransactionCategorizer:
             if 'receitas' in rules:
                 for rule in rules['receitas']:
                     category = rule['categoria']
+                    subcategory = rule.get('subcategoria', '')
                     keywords = rule['palavras']
-                    self.add_income_rule(category, keywords)
+                    self.add_income_rule(category, subcategory, keywords)
             
             # Carregar despesas
             if 'despesas' in rules:
                 for rule in rules['despesas']:
                     category = rule['categoria']
+                    subcategory = rule.get('subcategoria', '')
                     keywords = rule['palavras']
-                    self.add_expense_rule(category, keywords)
+                    self.add_expense_rule(category, subcategory, keywords)
             
             # Carregar transferências
             if 'transferencias' in rules:

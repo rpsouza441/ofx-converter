@@ -1,9 +1,11 @@
 # Regras de Categorização - OFX Converter
 # Este arquivo define as regras de categorização de transações
 # Edite este arquivo para adicionar/modificar categorias SEM alterar o código Python
+# FORMATO: categoria + subcategoria (opcional) + palavras-chave
 
 receitas:
-  - categoria: Dividendos
+  - categoria: Renda de Investimento
+    subcategoria: Rendimento de Juros
     palavras: 
       - dividendo
       - div
@@ -11,7 +13,8 @@ receitas:
       - rendimento
       - rendimentos
   
-  - categoria: Salário
+  - categoria: Finanças & Investimento
+    subcategoria: Ganhos Ocupacionais
     palavras:
       - salario
       - salário
@@ -19,12 +22,14 @@ receitas:
       - salario ord
   
   - categoria: Receitas
+    subcategoria: Outras Receitas
     palavras:
       - receita
       - recebida
       - transacao recebida
   
-  - categoria: Estornos
+  - categoria: Receitas
+    subcategoria: Estornos
     palavras:
       - estorno
       - devolucao
@@ -36,19 +41,22 @@ receitas:
       - transferencia cancelada
 
 despesas:
-  - categoria: Taxas e Tarifas
+  - categoria: Despesas Fixas
+    subcategoria: Taxas e Tarifas
     palavras:
       - taxa
       - tarifa
       - custo
       - anuidade
   
-  - categoria: Boletos
+  - categoria: Despesas Fixas
+    subcategoria: Boletos
     palavras:
       - boleto
       - pagamento de boleto
   
   - categoria: Alimentação
+    subcategoria: Restaurantes
     palavras:
       - supermercado
       - alimentacao
@@ -60,7 +68,8 @@ despesas:
       - uber eats
       - comida
   
-  - categoria: Compras Online
+  - categoria: Compras
+    subcategoria: Compras Online
     palavras:
       - amazon
       - marketplace
@@ -73,14 +82,16 @@ despesas:
       - pagamento com qr pix shpp
       - pagamento com qr pix magalu
   
-  - categoria: Compras Varejo
+  - categoria: Compras
+    subcategoria: Compras Varejo
     palavras:
       - shpp brasil
       - jesmond comercio
       - comercio varejista
       - pagamento com qr pix
   
-  - categoria: Combustível
+  - categoria: Transporte
+    subcategoria: Combustível
     palavras:
       - combustivel
       - combustível
@@ -89,6 +100,7 @@ despesas:
       - etanol
   
   - categoria: Saúde
+    subcategoria: Medicamentos
     palavras:
       - farmacia
       - farmácia
@@ -99,6 +111,7 @@ despesas:
   
   # Adicione suas próprias categorias aqui:
   # - categoria: Nome da Categoria
+  #   subcategoria: Nome da Subcategoria
   #   palavras:
   #     - palavra1
   #     - palavra2
