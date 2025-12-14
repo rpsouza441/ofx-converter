@@ -67,9 +67,15 @@ class TransactionCategorizer:
         """
         description_lower = description.lower()
         
+        # DEBUG: Log transfer rules
+        logger.debug(f"categorize_smart: description='{description}', amount={amount}")
+        logger.debug(f"categorize_smart: transfer_rules count={len(self.transfer_rules)}")
+        
         # 1. Primeiro verifica se é transferência (via YAML transferencias)
         for rule in self.transfer_rules:
+            logger.debug(f"Checking transfer rule: {rule['category']} - keywords: {rule['keywords']}")
             if any(keyword in description_lower for keyword in rule['keywords']):
+                logger.info(f"MATCHED TRANSFER: {description} -> {rule['category']}")
                 return {
                     'type': 'transfer',
                     'category': rule['category'],
