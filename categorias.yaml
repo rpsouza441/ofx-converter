@@ -30,6 +30,10 @@ receitas:
       - devolucao
       - devolução
       - reembolso
+      - transacao cancelada
+      - transação cancelada
+      - transferência cancelada
+      - transferencia cancelada
 
 despesas:
   - categoria: Taxas e Tarifas
@@ -104,7 +108,7 @@ transferencias:
   - categoria: Transferência Geral
     subcategoria: Transferência Bancária
     palavras:
-      # Mercado Pago - Frases completas específicas
+      # Mercado Pago - DEVE conter "pix" + "enviada/recebida"
       - transacao pix enviada
       - transacao pix recebida
       - transação pix enviada
@@ -113,12 +117,4 @@ transferencias:
       - transferencia pix recebida
       - transferência pix enviada
       - transferência pix recebida
-  
-  - categoria: Transferência Geral
-    subcategoria: Transferência Cancelada
-    palavras:
-      - transferência cancelada
-      - transferencia cancelada
-      - transacao cancelada
-      - transação cancelada
 
