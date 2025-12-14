@@ -43,7 +43,6 @@ class TransactionCategorizer:
         return {
             'Taxas e Tarifas': ['taxa', 'tarifa', 'custo', 'anuidade'],
             'Boletos': ['boleto', 'pagamento de boleto'],
-            'Transferências': ['pix', 'ted', 'doc', 'enviado', 'enviada'],
             'Alimentação': ['supermercado', 'alimentacao', 'alimentação', 'restaurante', 'lanche'],
             'Combustível': ['combustivel', 'combustível', 'gasolina', 'posto'],
             'Saúde': ['farmacia', 'farmácia', 'medicamento']

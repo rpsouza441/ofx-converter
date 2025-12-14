@@ -65,6 +65,9 @@ despesas:
       - mercado livre
       - mercadopago ip
       - pix marketplace
+      - pagamento com qr pix amazon
+      - pagamento com qr pix shpp
+      - pagamento com qr pix magalu
   
   - categoria: Compras Varejo
     palavras:
@@ -96,19 +99,20 @@ despesas:
   #     - palavra1
   #     - palavra2
 
-# Transferências entre contas
+# Transferências entre contas (FRASES COMPLETAS - Muito restritivo!)
 transferencias:
   - categoria: Transferência Geral
     subcategoria: Transferência Bancária
     palavras:
-      - transferência pix enviada
-      - transferência pix recebida
-      - transferencia pix enviada
-      - transferencia pix recebida
+      # Mercado Pago - Frases completas específicas
       - transacao pix enviada
       - transacao pix recebida
       - transação pix enviada
       - transação pix recebida
+      - transferencia pix enviada
+      - transferencia pix recebida
+      - transferência pix enviada
+      - transferência pix recebida
   
   - categoria: Transferência Geral
     subcategoria: Transferência Cancelada
