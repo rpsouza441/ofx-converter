@@ -1,171 +1,295 @@
-# OFX to QIF Converter v3.0
+# OFX/Mercado Pago to ezBookkeeping Converter v4.0
 
-Conversor automático de arquivos OFX para QIF usando Docker, otimizado para ezBookkeeping.
+Conversor automático de arquivos **OFX** e **Mercado Pago CSV** para formatos compatíveis com ezBookkeeping (**CSV** + **QIF**).
 
-**Novo v3.0:** Arquitetura modular com categorização configurável via YAML!
+**Novidade v4.0:** 
+- Suporte a Mercado Pago CSV
+- Exportação CSV ezBookkeeping (importação direta)
+- Subcategorias em receitas/despesas
+- Detecção inteligente de transferências via YAML
+
+---
+
+## Funcionalidades
+
+### Formatos Suportados
+
+**Entrada:**
+- Arquivos OFX/QFX (bancos brasileiros)
+- CSV do Mercado Pago
+
+**Saída:**
+- CSV ezBookkeeping (formato nativo, recomendado)
+- QIF (compatibilidade com outros apps)
+
+### Categorização Automática
+
+**100% Configurável via YAML** - sem código Python!
+
+- Transferências: Pix, TED, DOC entre contas
+- Receitas: Salário, Dividendos, Estornos
+- Despesas: Compras, Boletos, Alimentação, Saúde, etc.
+- Categoria + Subcategoria em tudo (compatível com ezBookkeeping)
+
+**Exemplos:**
+```
+Rendimentos                         → Renda de Investimento > Rendimento de Juros
+Pagamento com QR Pix AMAZON        → Compras > Compras Online
+Transacao Pix enviada Carine       → Transferência Geral > Transferência Bancária
+```
+
+### Automação
+
+- Monitora pasta `entrada/` a cada 5 segundos
+- Conversão automática OFX/CSV → CSV + QIF
+- Organização automática por mês-ano
+- Logs detalhados
+
+---
 
 ## Estrutura do Projeto
 
 ```
 ofx-converter/
-├── ofx_converter.py           # Main - orquestra services
-├── services/                  # Services modulares
-│   ├── file_reader.py        # Leitura OFX (auto-detecção encoding)
-│   ├── date_extractor.py     # Extração de mês-ano
-│   ├── text_normalizer.py    # Normalização UTF-8
-│   ├── categorizer.py        # Categorização de transações
-│   └── qif_writer.py         # Escrita de QIF
-├── categorias.yaml           # Regras de categorização (editável!)
+├── ofx_converter.py              # Orquestrador principal
+├── services/                     # Serviços modulares
+│   ├── mercadopago_parser.py    # Parser Mercado Pago CSV
+│   ├── ofx_parser.py             # Parser OFX
+│   ├── categorizer.py            # Categorização via YAML
+│   ├── ezbookkeeping_csv_writer.py  # Gerador CSV ezBookkeeping
+│   ├── qif_writer.py             # Gerador QIF
+│   ├── file_reader.py            # Leitura multi-encoding
+│   ├── date_extractor.py         # Extração de datas
+│   └── text_normalizer.py       # Normalização UTF-8
+├── categorias.yaml               # Regras de categorização (EDITÁVEL)
 ├── Dockerfile
 ├── docker-compose.yml
 └── README.md
 ```
 
-## Como usar
+---
 
-### 1. Configuração inicial
+## Como Usar
+
+### 1. Configuração Inicial
+
 ```bash
 chmod +x setup.sh
 ./setup.sh
 ```
 
-### 2. Iniciar o conversor
+### 2. Iniciar o Conversor
+
 ```bash
-docker compose up -d
+docker-compose up -d
 ```
 
-### 3. Usar o conversor
-1. Coloque arquivos `.ofx` na pasta `./entrada/`
-2. O conversor processa automaticamente (verifica a cada 5 segundos)
-3. Arquivos convertidos `.qif` ficam em `./convertido/`
-4. Arquivos processados são movidos para `./entrada/lido/`
+### 3. Converter Arquivos
 
-### 4. Ver logs
+#### Mercado Pago CSV
 ```bash
-docker compose logs -f
+# Copiar arquivo para entrada/
+cp account_statement_xxxxx.csv entrada/mercadopago-11-2025.csv
+
+# Aguardar conversão automática (5 segundos)
+# Arquivos gerados em convertido/MM-YYYY/:
+#   - mercadopago-11-2025.csv  (ezBookkeeping)
+#   - mercadopago-11-2025.qif  (compatibilidade)
 ```
 
-### 5. Parar o conversor
+#### OFX/QFX (Bancos)
 ```bash
-docker compose down
+# Copiar arquivo para entrada/
+cp extrato_nubank.ofx entrada/
+
+# Arquivos gerados em convertido/MM-YYYY/:
+#   - extrato_nubank.csv  (ezBookkeeping)
+#   - extrato_nubank.qif  (compatibilidade)
 ```
 
-## Funcionalidades v3.0
+### 4. Importar no ezBookkeeping
 
-### Arquitetura Modular 
-- **Services separados** para cada responsabilidade
-- **Fácil manutenção** e extensão
-- **Testável** (cada service pode ser testado independentemente)
+1. Abra ezBookkeeping
+2. Vá em **Importar Dados**
+3. Selecione o arquivo `.csv` gerado
+4. **Preencha Account/Account2** para transferências durante importação
+5. Pronto! Categorias e subcategorias já estarão aplicadas
 
-### Categorização Configurável 
-- **Arquivo YAML** com regras de categorização
-- **Adicionar categorias SEM alterar código Python!**
-- Suporte a múltiplas palavras-chave por categoria
+### 5. Ver Logs
 
-### Monitoramento Automático 
-- Monitoramento da pasta entrada
-- Conversão OFX → QIF automática
-- Organização por mês-ano
+```bash
+docker-compose logs -f
+```
 
-### Categorização Inteligente 
-- Dividendos/Proventos → "Dividendos"
-- Salário → "Salário"
-- PIX/TED recebidos → "Receitas"
-- PIX/TED enviados → "Transferências"
-- Boletos → "Boletos"
-- Alimentação, Saúde, Combustível, etc.
+### 6. Parar o Conversor
 
-### Tratamento de Dados 
-- **Normalização UTF-8** (remove acentos automaticamente)
-- **Correção de datas malformadas** (anos inválidos)
-- **Data mais frequente** para organização de pastas
-- **Permissões corretas** (rw-rw-r--)
+```bash
+docker-compose down
+```
 
-## Adicionar/Editar Categorias
+---
 
-Edite o arquivo `categorias.yaml`:
+## Configuração de Categorias
+
+### Estrutura do `categorias.yaml`
 
 ```yaml
+# Receitas com subcategorias
 receitas:
-  - categoria: Freelance
+  - categoria: Renda de Investimento
+    subcategoria: Rendimento de Juros
     palavras:
-      - freelance
-      - servico prestado
-      - consultoria
+      - rendimento
+      - rendimentos
+      - dividendo
 
+# Despesas com subcategorias
 despesas:
-  - categoria: Streaming
+  - categoria: Compras
+    subcategoria: Compras Online
     palavras:
-      - netflix
-      - spotify
-      - amazon prime
+      - pagamento com qr pix amazon
+      - marketplace
+
+# Transferências (frases completas!)
+transferencias:
+  - categoria: Transferência Geral
+    subcategoria: Transferência Bancária
+    palavras:
+      - transacao pix enviada
+      - transacao pix recebida
+      - transferencia pix enviada
 ```
 
-Rebuild Docker:
+### Como Adicionar Novas Transferências
+
+**Use frases completas para evitar falsos positivos:**
+
+```yaml
+transferencias:
+  - categoria: Transferência Geral
+    subcategoria: Transferência Bancária
+    palavras:
+      # Adicione aqui pessoas específicas que você transfere:
+      - transacao pix enviada maria silva
+      - transacao pix recebida joao santos
+      - transferencia nubank recebida pedro
+```
+
+### Como Adicionar Novas Categorias
+
+```yaml
+despesas:
+  - categoria: Saúde
+    subcategoria: Academia
+    palavras:
+      - smart fit
+      - bodytech
+      - mensalidade academia
+```
+
+### Aplicar Mudanças
 
 ```bash
-docker compose down
-docker compose build
-docker compose up -d
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
 ```
 
-Pronto! Suas categorias estão ativas.
+---
 
-## Configurações
+## Exemplos de Categorização
 
-Variáveis de ambiente no `docker-compose.yml`:
+### Transferências (Type: Transfer)
+```
+Descrição                                → Categoria              → Subcategoria
+===============================================================================
+Transacao Pix recebida Rodrigo          → Transferência Geral    → Transferência Bancária
+Transacao Pix enviada Carine            → Transferência Geral    → Transferência Bancária
+```
 
-- `WATCH_INTERVAL`: Intervalo de verificação em segundos (padrão: 5)
-- `TZ`: Fuso horário (padrão: America/Sao_Paulo)
+### Receitas (Type: Income)
+```
+Descrição                                → Categoria                   → Subcategoria
+=======================================================================================
+Rendimentos                             → Renda de Investimento       → Rendimento de Juros
+Salario EMPRESA XPTO                    → Finanças & Investimento     → Ganhos Ocupacionais
+Transacao cancelada AMAZON              → Receitas                    → Estornos
+```
+
+### Despesas (Type: Expense)
+```
+Descrição                                → Categoria          → Subcategoria
+===============================================================================
+Pagamento com QR Pix AMAZON             → Compras            → Compras Online
+Pagamento com QR Pix SHPP BRASIL        → Compras            → Compras Varejo
+Boleto de luz COPEL                     → Despesas Fixas     → Boletos
+iFood Restaurante XYZ                   → Alimentação        → Restaurantes
+```
+
+---
 
 ## Estrutura de Pastas
 
 ```
 ofx-converter/
-├── entrada/           <- Coloque arquivos .ofx aqui
-│   └── lido/         <- Arquivos já processados (organizados por mês)
+├── entrada/              # Coloque arquivos .ofx ou .csv aqui
+│   └── lido/            # Arquivos processados (organizados por mês)
 │       ├── 10-2025/
 │       └── 11-2025/
-├── convertido/       <- Arquivos .qif prontos (organizados por mês)
+├── convertido/          # Arquivos .csv + .qif prontos (organizados por mês)
 │   ├── 10-2025/
+│   │   ├── arquivo.csv  (ezBookkeeping)
+│   │   └── arquivo.qif  (compatibilidade)
 │   └── 11-2025/
-└── logs/            <- Logs da aplicação
+└── logs/               # Logs da aplicação
 ```
+
+---
 
 ## Troubleshooting
 
-### Container não inicia
-```bash
-docker compose logs
-```
-
 ### Arquivos não são processados
-- Verifique se os arquivos têm extensão `.ofx` ou `.qfx`
-- Verifique permissões das pastas
-- Veja logs: `docker compose logs -f`
 
-### Problema de encoding
-O conversor tenta múltiplos encodings (UTF-8, latin-1, cp1252) automaticamente.
+**Verifique:**
+- Extensão é `.ofx`, `.qfx` ou `.csv`?
+- CSV é do Mercado Pago? (header `INITIAL_BALANCE;CREDITS;...`)
+- Logs: `docker-compose logs -f`
 
-### Datas inválidas
-Datas malformadas (ex: ano 0002) são automaticamente corrigidas para o ano atual.
+### Transferências categorizadas incorretamente
+
+**"Pagamento com QR Pix" sendo Transfer:**
+- Problema: YAML tem palavra genérica (ex: `pix`)
+- Solução: Use frases completas: `transacao pix enviada`
+
+**Transferências sendo Expense:**
+- Problema: Falta no YAML transferencias
+- Solução: Adicione frase completa em `transferencias:`
 
 ### Categorias não aplicadas
-- Verifique o arquivo `categorias.yaml`
-- Rebuild: `docker compose down && docker compose build && docker compose up -d`
-- Veja logs para erros
-
-## Atualizar
 
 ```bash
-docker compose down
-docker compose build --no-cache
-docker compose up -d
+# Rebuild do zero:
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+
+# Veja logs:
+docker-compose logs -f | grep "categorize_smart"
 ```
+
+### CSV não importa no ezBookkeeping
+
+**Verifique:**
+- Encoding UTF-8?
+- Formato correto? (primeira linha = header)
+- Account/Account2 preenchidos durante importação?
+
+---
 
 ## Desenvolvimento
 
-### Executar localmente (sem Docker)
+### Executar Localmente (sem Docker)
 
 ```bash
 # Instalar dependências
@@ -175,21 +299,426 @@ pip install ofxparse pyyaml
 python ofx_converter.py
 ```
 
-### Testar Services
+### Testar Categorização
 
-```python
-from services.categorizer import TransactionCategorizer
-
-categorizer = TransactionCategorizer('categorias.yaml')
-categoria = categorizer.categorize("Salario ord empregador", 1500.00)
-print(categoria)  # Saída: Salário
+```bash
+python test_categorizer.py
 ```
 
-## Versões
+```python
+# test_categorizer.py
+import sys
+sys.path.insert(0, '.')
+from services.categorizer import TransactionCategorizer
 
-- **v3.0** - Arquitetura modular com services + categorização via YAML
-- **v2.0** - Organização por mês-ano + correção de datas
-- **v1.0** - Versão inicial
+c = TransactionCategorizer('categorias.yaml')
+
+desc = "Transacao Pix recebida Rodrigo"
+result = c.categorize_smart(desc, 1000.0)
+print(f"Type: {result['type']}")
+print(f"Category: {result['category']}")
+print(f"Subcategory: {result['subcategory']}")
+```
+
+---
+
+## CSV ezBookkeeping - Campos
+
+| Campo | Descrição | Exemplo |
+|-------|-----------|---------|
+| Time | Data/hora | `2025-11-03 00:00:00` |
+| Timezone | Fuso horário | `-03:00` |
+| Type | Transfer/Income/Expense | `Transfer` |
+| Category | Categoria principal | `Transferência Geral` |
+| Sub Category | Subcategoria | `Transferência Bancária` |
+| Account | Conta origem (vazio) | `` |
+| Account Currency | Moeda | `BRL` |
+| Amount | Valor | `1000.00` |
+| Account2 | Conta destino (vazio) | `` |
+| Account2 Currency | Moeda | `BRL` |
+| Account2 Amount | Valor | `1000.00` |
+| Geographic Location | Localização (vazio) | `` |
+| Tags | Tags (vazio) | `` |
+| Description | Descrição original | `Transacao Pix recebida...` |
+
+**Nota:** Account e Account2 ficam vazios para você preencher durante a importação no ezBookkeeping.
+
+---
+
+## Histórico de Versões
+
+### v4.0 (Atual)
+- Suporte a Mercado Pago CSV
+- Geração CSV ezBookkeeping (além de QIF)
+- Subcategorias em receitas/despesas
+- Detecção inteligente de transferências via YAML
+- Account/Account2 configuráveis na importação
+- Categorização 100% via YAML (sem hardcode)
+
+### v3.0
+- Arquitetura modular com services
+- Categorização via YAML
+
+### v2.0
+- Organização por mês-ano
+- Correção de datas
+
+### v1.0
+- Versão inicial OFX → QIF
+
+---
+
+## Documentação Adicional
+
+- `categorization_guide.md` - Guia completo de categorização
+- `test_summary.md` - Testes e validação
+- `walkthrough.md` - Passo a passo da implementação
+
+---
+
+## Contribuindo
+
+Problemas ou sugestões? Abra uma issue!
+
+---
+
+## Licença
+
+MIT
+
+
+```
+ofx-converter/
+├── ofx_converter.py              # Orquestrador principal
+├── services/                     # Serviços modulares
+│   ├── mercadopago_parser.py    # Parser Mercado Pago CSV
+│   ├── ofx_parser.py             # Parser OFX
+│   ├── categorizer.py            # Categorização via YAML
+│   ├── ezbookkeeping_csv_writer.py  # Gerador CSV ezBookkeeping
+│   ├── qif_writer.py             # Gerador QIF
+│   ├── file_reader.py            # Leitura multi-encoding
+│   ├── date_extractor.py         # Extração de datas
+│   └── text_normalizer.py       # Normalização UTF-8
+├── categorias.yaml               # ⚙️ Regras de categorização (EDITÁVEL!)
+├── Dockerfile
+├── docker-compose.yml
+└── README.md
+```
+
+---
+
+## 🚀 Como Usar
+
+### 1. Configuração Inicial
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+### 2. Iniciar o Conversor
+
+```bash
+docker-compose up -d
+```
+
+### 3. Converter Arquivos
+
+#### Mercado Pago CSV
+```bash
+# Copiar arquivo para entrada/
+cp account_statement_xxxxx.csv entrada/mercadopago-11-2025.csv
+
+# Aguardar conversão automática (5 segundos)
+# Arquivos gerados em convertido/MM-YYYY/:
+#   - mercadopago-11-2025.csv  (ezBookkeeping)
+#   - mercadopago-11-2025.qif  (compatibilidade)
+```
+
+#### OFX/QFX (Bancos)
+```bash
+# Copiar arquivo para entrada/
+cp extrato_nubank.ofx entrada/
+
+# Arquivos gerados em convertido/MM-YYYY/:
+#   - extrato_nubank.csv  (ezBookkeeping)
+#   - extrato_nubank.qif  (compatibilidade)
+```
+
+### 4. Importar no ezBookkeeping
+
+1. Abra ezBookkeeping
+2. Vá em **Importar Dados**
+3. Selecione o arquivo `.csv` gerado
+4. **Preencha Account/Account2** para transferências durante importação
+5. Pronto! Categorias e subcategorias já estarão aplicadas
+
+### 5. Ver Logs
+
+```bash
+docker-compose logs -f
+```
+
+### 6. Parar o Conversor
+
+```bash
+docker-compose down
+```
+
+---
+
+## Configuração de Categorias
+
+### Estrutura do `categorias.yaml`
+
+```yaml
+# Receitas com subcategorias
+receitas:
+  - categoria: Renda de Investimento
+    subcategoria: Rendimento de Juros
+    palavras:
+      - rendimento
+      - rendimentos
+      - dividendo
+
+# Despesas com subcategorias
+despesas:
+  - categoria: Compras
+    subcategoria: Compras Online
+    palavras:
+      - pagamento com qr pix amazon
+      - marketplace
+
+# Transferências (frases completas!)
+transferencias:
+  - categoria: Transferência Geral
+    subcategoria: Transferência Bancária
+    palavras:
+      - transacao pix enviada
+      - transacao pix recebida
+      - transferencia pix enviada
+```
+
+### Como Adicionar Novas Transferências
+
+**Use frases completas para evitar falsos positivos:**
+
+```yaml
+transferencias:
+  - categoria: Transferência Geral
+    subcategoria: Transferência Bancária
+    palavras:
+      # Adicione aqui pessoas específicas que você transfere:
+      - transacao pix enviada maria silva
+      - transacao pix recebida joao santos
+      - transferencia nubank recebida pedro
+```
+
+### Como Adicionar Novas Categorias
+
+```yaml
+despesas:
+  - categoria: Saúde
+    subcategoria: Academia
+    palavras:
+      - smart fit
+      - bodytech
+      - mensalidade academia
+```
+
+### Aplicar Mudanças
+
+```bash
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+---
+
+## Exemplos de Categorização
+
+### Transferências (Type: Transfer)
+```
+Descrição                                → Categoria              → Subcategoria
+===============================================================================
+Transacao Pix recebida Rodrigo          → Transferência Geral    → Transferência Bancária
+Transacao Pix enviada Carine            → Transferência Geral    → Transferência Bancária
+```
+
+### Receitas (Type: Income)
+```
+Descrição                                → Categoria                   → Subcategoria
+=======================================================================================
+Rendimentos                             → Renda de Investimento       → Rendimento de Juros
+Salario EMPRESA XPTO                    → Finanças & Investimento     → Ganhos Ocupacionais
+Transacao cancelada AMAZON              → Receitas                    → Estornos
+```
+
+### Despesas (Type: Expense)
+```
+Descrição                                → Categoria          → Subcategoria
+===============================================================================
+Pagamento com QR Pix AMAZON             → Compras            → Compras Online
+Pagamento com QR Pix SHPP BRASIL        → Compras            → Compras Varejo
+Boleto de luz COPEL                     → Despesas Fixas     → Boletos
+iFood Restaurante XYZ                   → Alimentação        → Restaurantes
+```
+
+---
+
+## Estrutura de Pastas
+
+```
+ofx-converter/
+├── entrada/              ← Coloque arquivos .ofx ou .csv aqui
+│   └── lido/            ← Arquivos processados (organizados por mês)
+│       ├── 10-2025/
+│       └── 11-2025/
+├── convertido/          ← Arquivos .csv + .qif prontos (organizados por mês)
+│   ├── 10-2025/
+│   │   ├── arquivo.csv  (ezBookkeeping)
+│   │   └── arquivo.qif  (compatibilidade)
+│   └── 11-2025/
+└── logs/               ← Logs da aplicação
+```
+
+---
+
+## Troubleshooting
+
+### Arquivos não são processados
+
+**Verifique:**
+- Extensão é `.ofx`, `.qfx` ou `.csv`?
+- CSV é do Mercado Pago? (header `INITIAL_BALANCE;CREDITS;...`)
+- Logs: `docker-compose logs -f`
+
+### Transferências categorizadas incorretamente
+
+**"Pagamento com QR Pix" sendo Transfer:**
+- Problema: YAML tem palavra genérica (ex: `pix`)
+- Solução: Use frases completas: `transacao pix enviada`
+
+**Transferências sendo Expense:**
+- Problema: Falta no YAML transferencias
+- Solução: Adicione frase completa em `transferencias:`
+
+### Categorias não aplicadas
+
+```bash
+# Rebuild do zero:
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+
+# Veja logs:
+docker-compose logs -f | grep "categorize_smart"
+```
+
+### CSV não importa no ezBookkeeping
+
+**Verifique:**
+- Encoding UTF-8?
+- Formato correto? (primeira linha = header)
+- Account/Account2 preenchidos durante importação?
+
+---
+
+## Desenvolvimento
+
+### Executar Localmente (sem Docker)
+
+```bash
+# Instalar dependências
+pip install ofxparse pyyaml
+
+# Executar
+python ofx_converter.py
+```
+
+### Testar Categorização
+
+```bash
+python test_categorizer.py
+```
+
+```python
+# test_categorizer.py
+import sys
+sys.path.insert(0, '.')
+from services.categorizer import TransactionCategorizer
+
+c = TransactionCategorizer('categorias.yaml')
+
+desc = "Transacao Pix recebida Rodrigo"
+result = c.categorize_smart(desc, 1000.0)
+print(f"Type: {result['type']}")
+print(f"Category: {result['category']}")
+print(f"Subcategory: {result['subcategory']}")
+```
+
+---
+
+## CSV ezBookkeeping - Campos
+
+| Campo | Descrição | Exemplo |
+|-------|-----------|---------|
+| Time | Data/hora | `2025-11-03 00:00:00` |
+| Timezone | Fuso horário | `-03:00` |
+| Type | Transfer/Income/Expense | `Transfer` |
+| Category | Categoria principal | `Transferência Geral` |
+| Sub Category | Subcategoria | `Transferência Bancária` |
+| Account | Conta origem (vazio) | `` |
+| Account Currency | Moeda | `BRL` |
+| Amount | Valor | `1000.00` |
+| Account2 | Conta destino (vazio) | `` |
+| Account2 Currency | Moeda | `BRL` |
+| Account2 Amount | Valor | `1000.00` |
+| Geographic Location | Localização (vazio) | `` |
+| Tags | Tags (vazio) | `` |
+| Description | Descrição original | `Transacao Pix recebida...` |
+
+> **Nota:** Account e Account2 ficam **vazios** para você preencher durante a importação no ezBookkeeping.
+
+---
+
+## Histórico de Versões
+
+### v4.0 (Atual)
+- Suporte a Mercado Pago CSV
+- Geração CSV ezBookkeeping (além de QIF)
+- Subcategorias em receitas/despesas
+- Detecção inteligente de transferências via YAML
+- Account/Account2 configuráveis na importação
+- Categorização 100% via YAML (sem hardcode)
+
+### v3.0
+- Arquitetura modular com services
+- Categorização via YAML
+
+### v2.0
+- Organização por mês-ano
+- Correção de datas
+
+### v1.0
+- Versão inicial OFX → QIF
+
+---
+
+## Documentação Adicional
+
+- `categorization_guide.md` - Guia completo de categorização
+- `test_summary.md` - Testes e validação
+- `walkthrough.md` - Passo a passo da implementação
+
+---
+
+## Contribuindo
+
+Problemas ou sugestões? Abra uma issue!
+
+---
 
 ## Licença
 
