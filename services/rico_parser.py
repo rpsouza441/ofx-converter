@@ -82,7 +82,7 @@ class RicoParser:
         date = self._parse_date(date_str)
         
         # Parse descrição
-        description = self.text_normalizer.normalize(row['Descricao'].strip())
+        description = self.text_normalizer.normalize_utf8(row['Descricao'].strip())
         
         # Parse valor
         amount = self._parse_amount(row['Valor'].strip())
