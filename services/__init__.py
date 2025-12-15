@@ -15,6 +15,7 @@ from services.file_validator import FileValidator
 from services.mercadopago_parser import MercadoPagoParser
 from services.ezbookkeeping_csv_writer import EZBookkeepingCSVWriter
 from services.rico_parser import RicoParser
+from services.rico_investimento_parser import RicoInvestimentoParser
 
 __all__ = [
     'OFXFileReader',
@@ -26,7 +27,8 @@ __all__ = [
     'FileValidator',
     'MercadoPagoParser',
     'EZBookkeepingCSVWriter',
-    'RicoParser'
+    'RicoParser',
+    'RicoInvestimentoParser'
 ]
 
 __version__ = '3.0.0'

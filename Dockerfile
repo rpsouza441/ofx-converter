@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 
 # Instalar dependencias
-RUN pip install --no-cache-dir ofxparse pyyaml
+RUN pip install --no-cache-dir ofxparse pyyaml openpyxl
 
 # Criar diretorios de trabalho
 WORKDIR /app

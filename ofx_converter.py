@@ -22,7 +22,8 @@ from services import (
     FileValidator,
     MercadoPagoParser,
     EZBookkeepingCSVWriter,
-    RicoParser
+    RicoParser,
+    RicoInvestimentoParser
 )
 
 # Configurar logging
@@ -78,6 +79,9 @@ class OFXConverter:
         
         # Parser Rico CSV
         self.rico_parser = RicoParser(self.categorizer)
+        
+        # Parser Rico Investimento XLSX
+        self.rico_investimento_parser = RicoInvestimentoParser(self.categorizer)
         
         logger.info("OFX Converter v3.0 iniciado")
         logger.info(f"Monitorando pasta: {self.entrada_dir}")
@@ -393,6 +397,103 @@ class OFXConverter:
             logger.error(f"Erro ao converter CSV Rico {csv_file.name}: {e}")
             return False
     
+    def convert_rico_investimento_file(self, xlsx_file: Path) -> bool:
+        """
+        Converte um arquivo XLSX de investimentos da Rico para CSV ezBookkeeping + QIF
+        
+        Args:
+            xlsx_file: Path do arquivo XLSX
+            
+        Returns:
+            True se conversao bem-sucedida
+        """
+        try:
+            # Parsear XLSX
+            logger.info(f"Convertendo XLSX Rico Investimento: {xlsx_file.name}")
+            transactions = self.rico_investimento_parser.parse(str(xlsx_file))
+            
+            if not transactions:
+                logger.error(f"Falha ao parsear XLSX Rico Investimento: {xlsx_file.name}")
+                return False
+            
+            # Extrair mes-ano das transacoes
+            month_year = self.date_extractor.extract_month_year_from_transactions(
+                [txn['date'] for txn in transactions]
+            )
+            
+            # Criar pastas para o mes-ano
+            lido_month_folder = self.create_month_folder(self.lido_dir, month_year)
+            convertido_month_folder = self.create_month_folder(self.convertido_dir, month_year)
+            
+            # Usar nome original do XLSX (sem extensão)
+            base_filename = xlsx_file.stem
+            csv_output_filename = f'{base_filename}.csv'
+            qif_output_filename = f'{base_filename}.qif'
+            
+            csv_path = convertido_month_folder / csv_output_filename
+            qif_path = convertido_month_folder / qif_output_filename
+            
+            # ====== ESCREVER CSV ======
+            csv_writer = EZBookkeepingCSVWriter()
+            csv_writer.create_csv_file(csv_path)
+            
+            for txn in transactions:
+                if txn['type'] == 'transfer':
+                    csv_writer.write_transfer(
+                        txn['date'],
+                        txn['amount'],
+                        txn['description'],
+                        txn['category'],
+                        txn['subcategory']
+                    )
+                elif txn['type'] == 'expense':
+                    csv_writer.write_expense(
+                        txn['date'],
+                        txn['amount'],
+                        txn['description'],
+                        txn['category'],
+                        txn['subcategory']
+                    )
+                elif txn['type'] == 'income':
+                    csv_writer.write_income(
+                        txn['date'],
+                        txn['amount'],
+                        txn['description'],
+                        txn['category'],
+                        txn['subcategory']
+                    )
+            
+            csv_writer.close()
+            logger.info(f"CSV ezBookkeeping salvo em: {csv_path}")
+            
+            # ====== ESCREVER QIF ======
+            qif_writer = QIFWriter()
+            qif_writer.create_qif_file(qif_path)
+            
+            for txn in transactions:
+                qif_writer.write_transaction(
+                    txn['date'],
+                    txn['amount'],
+                    txn['description'],
+                    txn['qif_category']
+                )
+            
+            qif_writer.close()
+            logger.info(f"QIF salvo em: {qif_path}")
+            
+            # Mover arquivo para lido
+            lido_path = lido_month_folder / xlsx_file.name
+            shutil.move(str(xlsx_file), str(lido_path))
+            
+            logger.info(f"Conversao bem-sucedida: {xlsx_file.name}")
+            logger.info(f"Arquivo original movido para: {lido_path}")
+            logger.info(f"Organizados na pasta: {month_year}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Erro ao converter XLSX Rico Investimento {xlsx_file.name}: {e}")
+            return False
+
     def scan_and_convert(self):
         """Escaneia pasta entrada e converte arquivos OFX, CSV do Mercado Pago e Rico"""
         # Arquivos OFX
