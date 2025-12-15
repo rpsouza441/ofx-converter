@@ -101,7 +101,7 @@ class RicoParser:
             'balance': self._parse_amount(row['Saldo'].strip())
         }
     
-    def _parse_date(self, date_str: str) -> datetime:
+    def _parse_date(self, date_str: str) -> str:
         """
         Parse data da Rico: "26/11/25 às 14:13:18"
         
@@ -109,7 +109,7 @@ class RicoParser:
             date_str: String de data
             
         Returns:
-            datetime object
+            String no formato 'YYYY-MM-DD HH:MM:SS'
         """
         try:
             # Remover " às " e parsear
@@ -118,12 +118,13 @@ class RicoParser:
             # Parse DD/MM/YY HH:MM:SS
             dt = datetime.strptime(f"{date_part} {time_part}", "%d/%m/%y %H:%M:%S")
             
-            return dt
+            # Retornar como string YYYY-MM-DD HH:MM:SS
+            return dt.strftime('%Y-%m-%d %H:%M:%S')
             
         except Exception as e:
             logger.error(f"Erro ao parsear data Rico '{date_str}': {e}")
-            # Fallback: retorna data atual
-            return datetime.now()
+            # Fallback: retorna data atual como string
+            return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
     def _parse_amount(self, value_str: str) -> float:
         """

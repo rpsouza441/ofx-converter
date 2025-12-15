@@ -105,8 +105,11 @@ class DateExtractor:
             
             for date_str in dates:
                 try:
+                    # Se tem hora (YYYY-MM-DD HH:MM:SS), pegar apenas a data
+                    date_part = date_str.split(' ')[0] if ' ' in date_str else date_str
+                    
                     # Parse YYYY-MM-DD
-                    date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+                    date_obj = datetime.strptime(date_part, '%Y-%m-%d')
                     month_year = date_obj.strftime('%m-%Y')
                     month_year_counts[month_year] = month_year_counts.get(month_year, 0) + 1
                 except:

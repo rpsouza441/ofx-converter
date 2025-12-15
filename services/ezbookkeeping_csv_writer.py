@@ -55,7 +55,7 @@ class EZBookkeepingCSVWriter:
             logger.error(f"Erro ao criar arquivo CSV: {e}")
             raise
     
-    def write_transfer(self, date: str, amount: str, description: str,
+    def write_transfer(self, date, amount: str, description: str,
                       category: str = 'Transferência Geral',
                       subcategory: str = 'Transferência Bancária',
                       tags: str = ''):
@@ -63,7 +63,7 @@ class EZBookkeepingCSVWriter:
         Escreve uma transação de transferência
         
         Args:
-            date: Data no formato YYYY-MM-DD
+            date: datetime object ou string YYYY-MM-DD HH:MM:SS
             amount: Valor (positivo)
             description: Descrição da transferência
             category: Categoria (default: Transferência Geral)
@@ -72,8 +72,8 @@ class EZBookkeepingCSVWriter:
         
         Note: Account e Account2 ficam vazios para preenchimento manual
         """
-        # Converter date para datetime com hora
-        time_str = f"{date} 00:00:00"
+        # Date já vem como string 'YYYY-MM-DD' ou 'YYYY-MM-DD HH:MM:SS'
+        time_str = str(date)
         
         # Valor absoluto para transferências
         amount_val = abs(float(amount))
@@ -97,13 +97,13 @@ class EZBookkeepingCSVWriter:
         
         self.writer.writerow(row)
     
-    def write_expense(self, date: str, amount: str, description: str,
+    def write_expense(self, date, amount: str, description: str,
                      category: str, subcategory: str = '', tags: str = ''):
         """
         Escreve uma transação de despesa
         
         Args:
-            date: Data no formato YYYY-MM-DD
+            date: datetime object ou string YYYY-MM-DD HH:MM:SS
             amount: Valor (negativo)
             description: Descrição da despesa
             category: Categoria da despesa
@@ -112,8 +112,11 @@ class EZBookkeepingCSVWriter:
         
         Note: Account fica vazio para preenchimento manual
         """
-        # Converter date para datetime com hora
-        time_str = f"{date} 00:00:00"
+        # Formatar data/hora
+        if isinstance(date, datetime):
+            time_str = date.strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            time_str = str(date)
         
         # Valor absoluto para despesas
         amount_val = abs(float(amount))
@@ -137,13 +140,13 @@ class EZBookkeepingCSVWriter:
         
         self.writer.writerow(row)
     
-    def write_income(self, date: str, amount: str, description: str,
+    def write_income(self, date, amount: str, description: str,
                     category: str, subcategory: str = '', tags: str = ''):
         """
         Escreve uma transação de receita
         
         Args:
-            date: Data no formato YYYY-MM-DD
+            date: datetime object ou string YYYY-MM-DD HH:MM:SS
             amount: Valor (positivo)
             description: Descrição da receita
             category: Categoria da receita
@@ -152,8 +155,11 @@ class EZBookkeepingCSVWriter:
         
         Note: Account fica vazio para preenchimento manual
         """
-        # Converter date para datetime com hora
-        time_str = f"{date} 00:00:00"
+        # Formatar data/hora
+        if isinstance(date, datetime):
+            time_str = date.strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            time_str = str(date)
         
         # Valor absoluto para receitas
         amount_val = abs(float(amount))
