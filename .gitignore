@@ -27,6 +27,7 @@ ENV/
 entrada/*.ofx
 entrada/*.qfx
 entrada/*.csv
+entrada/*.xlsx
 entrada/lido/
 convertido/
 logs/
@@ -36,6 +37,7 @@ logs/
 /*.qif
 /*.ofx
 /*.qfx
+/*.xlsx
 
 # Docker
 .env
