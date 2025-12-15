@@ -21,7 +21,8 @@ from services import (
     OFXParser,
     FileValidator,
     MercadoPagoParser,
-    EZBookkeepingCSVWriter
+    EZBookkeepingCSVWriter,
+    RicoParser
 )
 
 # Configurar logging
@@ -74,6 +75,9 @@ class OFXConverter:
             self.categorizer,
             self.date_extractor
         )
+        
+        # Parser Rico CSV
+        self.rico_parser = RicoParser(self.categorizer)
         
         logger.info("OFX Converter v3.0 iniciado")
         logger.info(f"Monitorando pasta: {self.entrada_dir}")
@@ -292,23 +296,130 @@ class OFXConverter:
             logger.error(f"Erro ao converter CSV {csv_file.name}: {e}")
             return False
     
+    def convert_rico_file(self, csv_file: Path) -> bool:
+        """
+        Converte um arquivo CSV da Rico para CSV ezBookkeeping + QIF
+        
+        Args:
+            csv_file: Path do arquivo CSV
+            
+        Returns:
+            True se conversao bem-sucedida
+        """
+        try:
+            # Parsear CSV
+            logger.info(f"Convertendo CSV Rico: {csv_file.name}")
+            transactions = self.rico_parser.parse(str(csv_file))
+            
+            if not transactions:
+                logger.error(f"Falha ao parsear CSV Rico: {csv_file.name}")
+                return False
+            
+            # Extrair mes-ano das transacoes
+            month_year = self.date_extractor.extract_month_year_from_transactions(
+                [txn['date'] for txn in transactions]
+            )
+            
+            # Criar pastas para o mes-ano
+            lido_month_folder = self.create_month_folder(self.lido_dir, month_year)
+            convertido_month_folder = self.create_month_folder(self.convertido_dir, month_year)
+            
+            # Usar nome original do CSV (sem extensão)
+            base_filename = csv_file.stem
+            csv_output_filename = f'{base_filename}.csv'
+            qif_output_filename = f'{base_filename}.qif'
+            
+            csv_path = convertido_month_folder / csv_output_filename
+            qif_path = convertido_month_folder / qif_output_filename
+            
+            # ====== ESCREVER CSV ======
+            csv_writer = EZBookkeepingCSVWriter()
+            csv_writer.create_csv_file(csv_path)
+            
+            for txn in transactions:
+                if txn['type'] == 'transfer':
+                    csv_writer.write_transfer(
+                        txn['date'],
+                        txn['amount'],
+                        txn['description'],
+                        txn['category'],
+                        txn['subcategory']
+                    )
+                elif txn['type'] == 'expense':
+                    csv_writer.write_expense(
+                        txn['date'],
+                        txn['amount'],
+                        txn['description'],
+                        txn['category'],
+                        txn['subcategory']
+                    )
+                elif txn['type'] == 'income':
+                    csv_writer.write_income(
+                        txn['date'],
+                        txn['amount'],
+                        txn['description'],
+                        txn['category'],
+                        txn['subcategory']
+                    )
+            
+            csv_writer.close()
+            logger.info(f"CSV ezBookkeeping salvo em: {csv_path}")
+            
+            # ====== ESCREVER QIF ======
+            qif_writer = QIFWriter()
+            qif_writer.create_qif_file(qif_path)
+            
+            for txn in transactions:
+                qif_writer.write_transaction(
+                    txn['date'],
+                    txn['amount'],
+                    txn['description'],
+                    txn['qif_category']
+                )
+            
+            qif_writer.close()
+            logger.info(f"QIF salvo em: {qif_path}")
+            
+            # Mover arquivo para lido
+            lido_path = lido_month_folder / csv_file.name
+            shutil.move(str(csv_file), str(lido_path))
+            
+            logger.info(f"Conversao bem-sucedida: {csv_file.name}")
+            logger.info(f"Arquivo original movido para: {lido_path}")
+            logger.info(f"Organizados na pasta: {month_year}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Erro ao converter CSV Rico {csv_file.name}: {e}")
+            return False
+    
     def scan_and_convert(self):
-        """Escaneia pasta entrada e converte arquivos OFX e CSV do Mercado Pago"""
+        """Escaneia pasta entrada e converte arquivos OFX, CSV do Mercado Pago e Rico"""
         # Arquivos OFX
         ofx_files = [f for f in self.entrada_dir.iterdir() 
                      if f.is_file() and self.file_validator.is_valid_ofx_file(f)]
         
-        # Arquivos CSV do Mercado Pago
+        # Arquivos CSV da Rico (tem "rico" no nome)
+        rico_files = [f for f in self.entrada_dir.iterdir()
+                      if f.is_file() and self.file_validator.is_valid_rico_csv(f)]
+        
+        # Arquivos CSV do Mercado Pago (CSV que NÃO é da Rico)
         csv_files = [f for f in self.entrada_dir.iterdir() 
-                     if f.is_file() and self.file_validator.is_valid_mercadopago_csv(f)]
+                     if f.is_file() and self.file_validator.is_valid_mercadopago_csv(f)
+                     and not self.file_validator.is_valid_rico_csv(f)]
         
         if ofx_files:
             logger.info(f"Encontrados {len(ofx_files)} arquivo(s) OFX para converter")
             for ofx_file in ofx_files:
                 self.convert_file(ofx_file)
         
+        if rico_files:
+            logger.info(f"Encontrados {len(rico_files)} arquivo(s) CSV da Rico para converter")
+            for rico_file in rico_files:
+                self.convert_rico_file(rico_file)
+        
         if csv_files:
-            logger.info(f"Encontrados {len(csv_files)} arquivo(s) CSV para converter")
+            logger.info(f"Encontrados {len(csv_files)} arquivo(s) CSV do Mercado Pago para converter")
             for csv_file in csv_files:
                 self.convert_mercadopago_file(csv_file)
     

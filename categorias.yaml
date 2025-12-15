@@ -122,12 +122,14 @@ transferencias:
     subcategoria: Transferência Bancária
     palavras:
       # Mercado Pago - DEVE conter "pix" + "enviada/recebida"
-      - transacao pix enviada
-      - transacao pix recebida
-      - transação pix enviada
-      - transação pix recebida
-      - transferencia pix enviada
-      - transferencia pix recebida
-      - transferência pix enviada
-      - transferência pix recebida
+      - Transacao Pix recebida Rodrigo
+      - Transacao Pix enviada Carine
+      - transacao pix recebida Rodrigo
+      - transacao pix enviada Carine
+      - transação pix enviada Rodrigo
+      - transação pix recebida Carine
+      - transferencia pix enviada Rodrigo
+      - transferencia pix recebida Carine
+      - transferência pix enviada Rodrigo
+      - transferência pix recebida Carine
 
