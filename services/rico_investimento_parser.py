@@ -38,29 +38,31 @@ class RicoInvestimentoParser:
             wb = openpyxl.load_workbook(file_path)
             ws = wb.active
             
-            # Encontrar linha do header (procurar por "Movimentação")
+            # Encontrar linha do header (procurar por "Movimentação" em qualquer coluna)
             header_row = None
-            for row_num in range(1, min(20, ws.max_row + 1)):
-                cell_value = ws.cell(row=row_num, column=1).value
-                if cell_value and 'Movimentação' in str(cell_value):
-                    header_row = row_num
+            for row_num in range(1, min(30, ws.max_row + 1)):
+                for col_num in range(1, 10):  # Verificar primeiras 10 colunas
+                    cell_value = ws.cell(row=row_num, column=col_num).value
+                    if cell_value and 'Movimentação' in str(cell_value):
+                        header_row = row_num
+                        logger.info(f"Header encontrado na linha {header_row}, coluna {col_num}")
+                        break
+                if header_row:
                     break
             
             if not header_row:
                 logger.error(f"Header 'Movimentação' não encontrado no XLSX: {file_path}")
                 return []
             
-            logger.info(f"Header encontrado na linha {header_row}")
-            
             # Processar linhas de dados (após header)
             for row_num in range(header_row + 1, ws.max_row + 1):
                 try:
-                    # Ler células da linha
-                    liquidacao = ws.cell(row=row_num, column=2).value  # Data liquidação
-                    lancamento = ws.cell(row=row_num, column=3).value  # Descrição
-                    # Coluna 4 = quantidade (informativo, ignorar)
-                    valor = ws.cell(row=row_num, column=5).value       # Valor R$
-                    # Coluna 6 = saldo (ignorar)
+                    # Ler células da linha (Excel offset: col A=1 está vazia, dados começam em B=2)
+                    liquidacao = ws.cell(row=row_num, column=3).value  # Col C - Data liquidação
+                    lancamento = ws.cell(row=row_num, column=4).value  # Col D - Descrição
+                    # Coluna 5 (E) = quantidade (informativo, ignorar)
+                    valor = ws.cell(row=row_num, column=6).value       # Col F - Valor R$
+                    # Coluna 7 (G) = saldo (ignorar)
                     
                     # Pular linhas vazias
                     if not liquidacao or not lancamento:
