@@ -112,11 +112,8 @@ class EZBookkeepingCSVWriter:
         
         Note: Account fica vazio para preenchimento manual
         """
-        # Formatar data/hora
-        if isinstance(date, datetime):
-            time_str = date.strftime('%Y-%m-%d %H:%M:%S')
-        else:
-            time_str = str(date)
+        # Date já vem como string 'YYYY-MM-DD' ou 'YYYY-MM-DD HH:MM:SS'
+        time_str = str(date)
         
         # Valor absoluto para despesas
         amount_val = abs(float(amount))
