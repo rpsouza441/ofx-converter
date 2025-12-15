@@ -500,6 +500,10 @@ class OFXConverter:
         ofx_files = [f for f in self.entrada_dir.iterdir() 
                      if f.is_file() and self.file_validator.is_valid_ofx_file(f)]
         
+        # Arquivos XLSX de investimentos da Rico
+        rico_xlsx_files = [f for f in self.entrada_dir.iterdir()
+                           if f.is_file() and self.file_validator.is_valid_rico_investimento_xlsx(f)]
+        
         # Arquivos CSV da Rico (tem "rico" no nome)
         rico_files = [f for f in self.entrada_dir.iterdir()
                       if f.is_file() and self.file_validator.is_valid_rico_csv(f)]
@@ -513,6 +517,11 @@ class OFXConverter:
             logger.info(f"Encontrados {len(ofx_files)} arquivo(s) OFX para converter")
             for ofx_file in ofx_files:
                 self.convert_file(ofx_file)
+        
+        if rico_xlsx_files:
+            logger.info(f"Encontrados {len(rico_xlsx_files)} arquivo(s) XLSX Rico Investimento para converter")
+            for rico_xlsx_file in rico_xlsx_files:
+                self.convert_rico_investimento_file(rico_xlsx_file)
         
         if rico_files:
             logger.info(f"Encontrados {len(rico_files)} arquivo(s) CSV da Rico para converter")
