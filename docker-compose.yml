@@ -11,6 +11,11 @@ services:
       - "./convertido:/app/convertido"
       # Logs para debug
       - "./logs:/app/logs"
+      
+      # Código Python - permite editar sem rebuild (hot reload)
+      - "./ofx_converter.py:/app/ofx_converter.py"
+      - "./services:/app/services"
+      - "./categorias.yaml:/app/categorias.yaml"
     environment:
       - TZ=America/Sao_Paulo
       - WATCH_INTERVAL=5  # Intervalo em segundos para verificar novos arquivos
