@@ -1,12 +1,19 @@
-# OFX/Mercado Pago to ezBookkeeping Converter v4.0
+# OFX/CSV Multi-Format to ezBookkeeping Converter v5.0
 
-Conversor automático de arquivos **OFX** e **Mercado Pago CSV** para formatos compatíveis com ezBookkeeping (**CSV** + **QIF**).
+Conversor automático de múltiplos formatos financeiros para ezBookkeeping (**CSV** + **QIF**).
 
-**Novidade v4.0:** 
-- Suporte a Mercado Pago CSV
-- Exportação CSV ezBookkeeping (importação direta)
-- Subcategorias em receitas/despesas
-- Detecção inteligente de transferências via YAML
+**Formatos Suportados:**
+- OFX/QFX (bancos brasileiros)
+- Mercado Pago CSV
+- Rico Corretora CSV (conta digital)
+- Rico Investimentos XLSX (conta investimento)
+- XP Cartão de Crédito CSV
+
+**Novidades v5.0:**
+- Suporte Rico CSV e XLSX
+- Suporte XP Cartão de Crédito
+- Detecção automática de formato por header
+- Todas transações com subcategorias
 
 ---
 
@@ -16,7 +23,10 @@ Conversor automático de arquivos **OFX** e **Mercado Pago CSV** para formatos c
 
 **Entrada:**
 - Arquivos OFX/QFX (bancos brasileiros)
-- CSV do Mercado Pago
+- CSV Mercado Pago (conta digital)
+- CSV Rico (conta digital)
+- XLSX Rico Investimentos (conta investimento)
+- CSV XP Cartão de Crédito
 
 **Saída:**
 - CSV ezBookkeeping (formato nativo, recomendado)
@@ -54,6 +64,9 @@ ofx-converter/
 ├── ofx_converter.py              # Orquestrador principal
 ├── services/                     # Serviços modulares
 │   ├── mercadopago_parser.py    # Parser Mercado Pago CSV
+│   ├── rico_parser.py            # Parser Rico CSV (conta digital)
+│   ├── rico_investimento_parser.py  # Parser Rico XLSX (investimentos)
+│   ├── xp_cartao_parser.py       # Parser XP Cartão CSV
 │   ├── ofx_parser.py             # Parser OFX
 │   ├── categorizer.py            # Categorização via YAML
 │   ├── ezbookkeeping_csv_writer.py  # Gerador CSV ezBookkeeping
@@ -102,9 +115,38 @@ cp account_statement_xxxxx.csv entrada/mercadopago-11-2025.csv
 # Copiar arquivo para entrada/
 cp extrato_nubank.ofx entrada/
 
-# Arquivos gerados em convertido/MM-YYYY/:
-#   - extrato_nubank.csv  (ezBookkeeping)
-#   - extrato_nubank.qif  (compatibilidade)
+# Arquivos gerados em convertido/MM-YYYY/
+# - extrato_nubank.csv  (ezBookkeeping)
+# - extrato_nubank.qif  (compatibilidade)
+```
+
+#### Rico CSV (Conta Digital)
+```bash
+# Copiar CSV da Rico para entrada/
+cp Rico_carine_extrato_de_01-11-2025_ate_30-11-2025.csv entrada/
+
+# Detecção automática pelo nome "rico"
+# Arquivos gerados em convertido/MM-YYYY/
+```
+
+#### Rico XLSX (Investimentos)
+```bash
+# Copiar XLSX de investimentos para entrada/
+cp Rico_investimento_Carine_extrato_de_01-11-2025_ate_30-11-2025.xlsx entrada/
+
+# Detecção automática por "rico" + "investimento" no nome
+# Usa data de liquidação (quando $ movimenta)
+# Arquivos gerados em convertido/MM-YYYY/
+```
+
+#### XP Cartão de Crédito
+```bash
+# Copiar CSV do cartão XP para entrada/
+cp fatura_xp_outubro.csv entrada/
+
+# Detecção automática pelo header (Data;Estabelecimento;Portador;Valor;Parcela)
+# Parcelas incluídas na descrição
+# Arquivos gerados em convertido/MM-YYYY/
 ```
 
 ### 4. Importar no ezBookkeeping
