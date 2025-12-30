@@ -76,7 +76,7 @@ class TransactionCategorizer:
             # Fallback
             return {
                 'type': 'income',
-                'category': 'Receitas',
+                'category': 'Diversos',
                 'subcategory': 'Outras Receitas'
             }
         else:
@@ -90,7 +90,7 @@ class TransactionCategorizer:
             # Fallback
             return {
                 'type': 'expense',
-                'category': 'Despesas',
+                'category': 'Diversos',
                 'subcategory': 'Outras Despesas'
             }
     

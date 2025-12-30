@@ -1,135 +1,638 @@
-# Regras de Categorização - OFX Converter
-# Este arquivo define as regras de categorização de transações
-# Edite este arquivo para adicionar/modificar categorias SEM alterar o código Python
-# FORMATO: categoria + subcategoria (opcional) + palavras-chave
+# Regras de Categorização - OFX Converter v3.0
+# Categorias alinhadas com ezBookkeeping
+# Palavras-chave genéricas (amazon, shopee) vão para Diversos
+# Palavras-chave específicas classificam precisamente
 
+# ==================== RECEITAS ====================
 receitas:
-  - categoria: Renda de Investimento
-    subcategoria: Rendimento de Juros
-    palavras: 
-      - dividendo
-      - div
-      - provento
-      - rendimento
-      - rendimentos
-  
-  - categoria: Finanças & Investimento
-    subcategoria: Ganhos Ocupacionais
+  # ----- GANHOS OCUPACIONAIS -----
+  - categoria: Ganhos Ocupacionais
+    subcategoria: Renda de Salário
     palavras:
       - salario
       - salário
       - ord empregador
       - salario ord
   
-  - categoria: Receitas
+  - categoria: Ganhos Ocupacionais
+    subcategoria: Renda de Bônus
+    palavras:
+      - bonus
+      - bônus
+      - premio
+      - prêmio
+  
+  - categoria: Ganhos Ocupacionais
+    subcategoria: Pagamento de Hora Extra
+    palavras:
+      - hora extra
+      - horas extras
+  
+  - categoria: Ganhos Ocupacionais
+    subcategoria: Renda de Trabalho Paralelo
+    palavras:
+      - freelance
+      - freela
+      - trabalho paralelo
+  
+  - categoria: Ganhos Ocupacionais
+    subcategoria: Estorno
+    palavras:
+      - estorno
+      - devolucao
+      - devolução
+      - devolvido
+      - transacao cancelada
+      - transação cancelada
+  
+  # ----- FINANÇAS & INVESTIMENTO -----
+  - categoria: Finanças & Investimento
+    subcategoria: Renda de Investimento
+    palavras:
+      - dividendo
+      - div
+      - provento
+  
+  - categoria: Finanças & Investimento
+    subcategoria: Renda de Aluguel
+    palavras:
+      - aluguel recebido
+      - renda de aluguel
+  
+  - categoria: Finanças & Investimento
+    subcategoria: Rendimento de Juros
+    palavras:
+      - rendimento
+      - rendimentos
+      - rendimento de juros
+      - rendimentos de clientes
+  
+  # ----- DIVERSOS -----
+  - categoria: Diversos
+    subcategoria: Renda de Presente e Dinheiro da Sorte
+    palavras:
+      - presente
+      - dinheiro da sorte
+  
+  - categoria: Diversos
+    subcategoria: Renda de Prêmios
+    palavras:
+      - loteria
+      - sorteio
+  
+  - categoria: Diversos
+    subcategoria: Ganho Extraordinário
+    palavras:
+      - saldo inicial
+      - ganho extraordinario
+      - ganho extraordinário
+  
+  - categoria: Diversos
+    subcategoria: Reembolso
+    palavras:
+      - reembolso
+      - ressarcimento
+  
+  - categoria: Diversos
     subcategoria: Outras Receitas
     palavras:
       - receita
       - recebida
       - transacao recebida
-  
-  - categoria: Receitas
-    subcategoria: Estornos
-    palavras:
-      - estorno
-      - devolucao
-      - devolução
-      - reembolso
-      - transacao cancelada
-      - transação cancelada
-      - transferência cancelada
-      - transferencia cancelada
 
+# ==================== DESPESAS ====================
 despesas:
-  - categoria: Despesas Fixas
-    subcategoria: Taxas e Tarifas
+  # ----- COMIDA E BEBIDA -----
+  - categoria: Comida e Bebida
+    subcategoria: Comida
     palavras:
-      - taxa
-      - tarifa
-      - custo
-      - anuidade
-  
-  - categoria: Despesas Fixas
-    subcategoria: Boletos
-    palavras:
-      - boleto
-      - pagamento de boleto
-  
-  - categoria: Alimentação
-    subcategoria: Restaurantes
-    palavras:
-      - supermercado
-      - alimentacao
-      - alimentação
-      - restaurante
-      - lanche
       - ifood
       - ifd
       - uber eats
-      - comida
+      - rappi
+      - restaurante
+      - lanche
+      - supermercado
+      - mercado
+      - padaria
+      - acougue
+      - açougue
+      - hortifruti
+      - muffato
   
-  - categoria: Compras
-    subcategoria: Compras Online
+  - categoria: Comida e Bebida
+    subcategoria: Bebida
     palavras:
-      - amazon
-      - marketplace
-      - magalupay
-      - shopee
-      - mercado livre
-      - mercadopago ip
-      - pix marketplace
-      - pagamento com qr pix amazon
-      - pagamento com qr pix shpp
-      - pagamento com qr pix magalu
+      - bar
+      - cervejaria
+      - cerveja
+      - bebida
   
-  - categoria: Compras
-    subcategoria: Compras Varejo
+  - categoria: Comida e Bebida
+    subcategoria: Frutas e Petiscos
     palavras:
-      - shpp brasil
-      - jesmond comercio
-      - comercio varejista
-      - pagamento com qr pix
+      - fruta
+      - petisco
+      - salgado
+      - doce
+  
+  # ----- VESTUÁRIO E APARÊNCIA -----
+  - categoria: Vestuário e Aparência
+    subcategoria: Vestuário
+    palavras:
+      - roupa
+      - calcado
+      - calçado
+      - sapato
+      - tenis
+      - tênis
+      - vestuario
+      - vestuário
+      - moda
+      - sbf comercio
+  
+  - categoria: Vestuário e Aparência
+    subcategoria: Joias
+    palavras:
+      - joia
+      - joalheria
+      - ouro
+      - prata
+  
+  - categoria: Vestuário e Aparência
+    subcategoria: Cosmético
+    palavras:
+      - cosmetico
+      - cosmético
+      - maquiagem
+      - perfume
+  
+  - categoria: Vestuário e Aparência
+    subcategoria: Cortes de Cabelo & Salão
+    palavras:
+      - barbearia
+      - salao
+      - salão
+      - cabelo
+      - cabeleireiro
+  
+  # ----- MORADIA E UTENSÍLIOS DOMÉSTICOS -----
+  - categoria: Moradia e Utensílios Domésticos
+    subcategoria: Utensílios Domésticos
+    palavras:
+      - moveis
+      - móveis
+      - utensilios
+      - utensílios
+      - cozinha
+      - panela
+      - prato
+      - decoracao
+      - decoração
+  
+  - categoria: Moradia e Utensílios Domésticos
+    subcategoria: Eletrônicos
+    palavras:
+      - eletronico
+      - eletrônico
+      - celular
+      - computador
+      - notebook
+      - tablet
+      - televisao
+      - televisão
+  
+  - categoria: Moradia e Utensílios Domésticos
+    subcategoria: Reparos & Manutenção
+    palavras:
+      - reparo
+      - manutencao
+      - manutenção
+      - conserto
+      - resistencia
+      - ducha
+  
+  - categoria: Moradia e Utensílios Domésticos
+    subcategoria: Serviços de Limpeza
+    palavras:
+      - limpeza
+      - faxina
+      - diarista
+      - lavanderia
+  
+  - categoria: Moradia e Utensílios Domésticos
+    subcategoria: Despesa de Utilidades
+    palavras:
+      - copel
+      - luz
+      - energia
+      - eletrica
+      - elétrica
+      - agua
+      - água
+      - gas
+      - gás
+      - saneamento
+  
+  - categoria: Moradia e Utensílios Domésticos
+    subcategoria: Aluguel & Hipoteca
+    palavras:
+      - aluguel
+      - aluguel pago
+      - hipoteca
+      - financiamento
+      - condominio
+      - condomínio
+  
+  # ----- TRANSPORTE -----
+  - categoria: Transporte
+    subcategoria: Transporte Público
+    palavras:
+      - onibus
+      - ônibus
+      - metro
+      - metrô
+      - trem
+      - transporte publico
+      - transporte público
   
   - categoria: Transporte
-    subcategoria: Combustível
+    subcategoria: Táxi & Aluguel de Carro
+    palavras:
+      - uber
+      - 99
+      - taxi
+      - táxi
+      - cabify
+      - aluguel de carro
+  
+  - categoria: Transporte
+    subcategoria: Despesa com Carro Pessoal
     palavras:
       - combustivel
       - combustível
       - gasolina
-      - posto
       - etanol
+      - diesel
+      - posto
+      - ipva
+      - licenciamento
+      - seguro auto
+      - estacionamento
   
-  - categoria: Saúde
+  - categoria: Transporte
+    subcategoria: Passagens de Trem
+    palavras:
+      - passagem de trem
+      - bilhete de trem
+  
+  - categoria: Transporte
+    subcategoria: Passagens Aéreas
+    palavras:
+      - passagem aerea
+      - passagem aérea
+      - voo
+      - cia aerea
+      - cia aérea
+  
+  # ----- COMUNICAÇÃO -----
+  - categoria: Comunicação
+    subcategoria: Conta de Telefone
+    palavras:
+      - telefone
+      - celular
+      - tim
+      - vivo
+      - claro
+      - oi
+      - nextel
+  
+  - categoria: Comunicação
+    subcategoria: Conta de Internet
+    palavras:
+      - internet
+      - banda larga
+      - fibra optica
+      - fibra óptica
+  
+  - categoria: Comunicação
+    subcategoria: Taxa Expressa
+    palavras:
+      - correio
+      - sedex
+      - pac
+      - entrega expressa
+      - frete expresso
+  
+  # ----- ENTRETENIMENTO -----
+  - categoria: Entretenimento
+    subcategoria: Esporte & Fitness
+    palavras:
+      - academia
+      - gym
+      - fitness
+      - wellhub
+      - gympass
+      - esporte
+      - crossfit
+  
+  - categoria: Entretenimento
+    subcategoria: Despesa de Festa
+    palavras:
+      - festa
+      - aniversario
+      - aniversário
+      - celebracao
+      - celebração
+  
+  - categoria: Entretenimento
+    subcategoria: Filmes & Shows
+    palavras:
+      - cinema
+      - filme
+      - show
+      - teatro
+      - concerto
+  
+  - categoria: Entretenimento
+    subcategoria: Brinquedos & Jogos
+    palavras:
+      - brinquedo
+      - jogo
+      - game
+      - videogame
+      - playstation
+      - xbox
+  
+  - categoria: Entretenimento
+    subcategoria: Assinaturas
+    palavras:
+      - netflix
+      - spotify
+      - amazon prime
+      - disney
+      - hbo
+      - streaming
+  
+  - categoria: Entretenimento
+    subcategoria: Despesa com Animais de Estimação
+    palavras:
+      - pet
+      - petshop
+      - veterinario
+      - veterinário
+      - racao
+      - ração
+      - cachorro
+      - gato
+      - animal
+      - petlove
+      - petonline
+  
+  - categoria: Entretenimento
+    subcategoria: Viagens
+    palavras:
+      - hotel
+      - hospedagem
+      - pousada
+      - viagem
+      - turismo
+      - passagem
+  
+  # ----- EDUCAÇÃO & ESTUDOS -----
+  - categoria: Educação & Estudos
+    subcategoria: Livros & Jornal & Revistas
+    palavras:
+      - livro
+      - livraria
+      - jornal
+      - revista
+  
+  - categoria: Educação & Estudos
+    subcategoria: Cursos de Treinamento
+    palavras:
+      - curso
+      - treinamento
+      - aula
+      - faculdade
+      - universidade
+      - pos graduacao
+      - pós graduação
+      - kotas servicos
+  
+  - categoria: Educação & Estudos
+    subcategoria: Certificação & Exame
+    palavras:
+      - certificacao
+      - certificação
+      - exame
+      - prova
+      - teste
+  
+  # ----- PRESENTES & DOAÇÕES -----
+  - categoria: Presentes & Doações
+    subcategoria: Presentes
+    palavras:
+      - presente
+      - mimo
+  
+  - categoria: Presentes & Doações
+    subcategoria: Doações
+    palavras:
+      - doacao
+      - doação
+      - caridade
+      - ong
+  
+  # ----- MÉDICO & SAÚDE -----
+  - categoria: Médico & Saúde
+    subcategoria: Diagnóstico & Tratamento
+    palavras:
+      - hospital
+      - clinica
+      - clínica
+      - consulta
+      - exame medico
+      - exame médico
+      - laboratorio
+      - laboratório
+  
+  - categoria: Médico & Saúde
     subcategoria: Medicamentos
     palavras:
       - farmacia
       - farmácia
       - medicamento
-      - hospital
-      - medico
-      - médico
+      - remedio
+      - remédio
+      - drogaria
+      - nissei
   
-  # Adicione suas próprias categorias aqui:
-  # - categoria: Nome da Categoria
-  #   subcategoria: Nome da Subcategoria
-  #   palavras:
-  #     - palavra1
-  #     - palavra2
+  - categoria: Médico & Saúde
+    subcategoria: Dispositivos Médicos
+    palavras:
+      - oculos
+      - óculos
+      - aparelho auditivo
+      - cadeira de rodas
+  
+  - categoria: Médico & Saúde
+    subcategoria: Academia
+    palavras:
+      - plano de saude
+      - plano de saúde
+      - unimed
+      - amil
+      - sulamerica
+      - sulamerica
+  
+  # ----- FINANÇAS & SEGURO -----
+  - categoria: Finanças & Seguro
+    subcategoria: Despesa com Impostos
+    palavras:
+      - imposto
+      - iptu
+      - ipva
+      - irpf
+      - imposto de renda
+      - tributo
+  
+  - categoria: Finanças & Seguro
+    subcategoria: Taxa de Serviço
+    palavras:
+      - taxa
+      - tarifa
+      - anuidade
+      - mensalidade
+  
+  - categoria: Finanças & Seguro
+    subcategoria: Despesa com Seguro
+    palavras:
+      - seguro
+      - apolice
+      - apólice
+  
+  - categoria: Finanças & Seguro
+    subcategoria: Despesa com Juros
+    palavras:
+      - juros
+      - iof
+      - multa
+      - mora
+  
+  - categoria: Finanças & Seguro
+    subcategoria: Compensação & Multa
+    palavras:
+      - compensacao
+      - compensação
+      - multa
+      - penalidade
+  
+  # ----- DIVERSOS -----
+  - categoria: Diversos
+    subcategoria: Outras Despesas
+    palavras:
+      - amazon
+      - shopee
+      - shpp brasil
+      - mercado pago ip
+      - magalupay
+      - marketplace
+      - mercado livre
+      - ebanx
+      - pagamento de boleto
+      - boleto
+      - trae
 
-# Transferências entre contas (FRASES COMPLETAS - Muito restritivo!)
+# ==================== TRANSFERÊNCIAS ====================
 transferencias:
+  # ----- TRANSFERÊNCIA GERAL -----
   - categoria: Transferência Geral
     subcategoria: Transferência Bancária
     palavras:
-      # Mercado Pago - DEVE conter "pix" + "enviada/recebida"
-      - Transacao Pix recebida Rodrigo
-      - Transacao Pix enviada Carine
-      - transacao pix recebida Rodrigo
-      - transacao pix enviada Carine
-      - transação pix enviada Rodrigo
-      - transação pix recebida Carine
-      - transferencia pix enviada Rodrigo
-      - transferencia pix recebida Carine
-      - transferência pix enviada Rodrigo
-      - transferência pix recebida Carine
-
+      - transacao pix recebida
+      - transacao pix enviada
+      - transação pix recebida
+      - transação pix enviada
+      - transferencia pix recebida
+      - transferencia pix enviada
+      - transferência pix recebida
+      - transferência pix enviada
+      - pix recebido de
+      - pix enviado para
+      - pix devolvido
+      - transferencia bancaria
+      - transferência bancária
+      - operacoes em bolsa
+      - operações em bolsa
+  
+  - categoria: Transferência Geral
+    subcategoria: Pagamento de Cartão de Crédito
+    palavras:
+      - pagamento de fatura
+      - pagamento fatura
+      - pagar fatura
+  
+  - categoria: Transferência Geral
+    subcategoria: Depósitos e Saques
+    palavras:
+      - deposito
+      - depósito
+      - saque
+      - retirada
+  
+  # ----- EMPRÉSTIMO E DÍVIDA -----
+  - categoria: Empréstimo e Dívida
+    subcategoria: Empréstimo de Dinheiro
+    palavras:
+      - emprestimo recebido
+      - empréstimo recebido
+      - financiamento recebido
+  
+  - categoria: Empréstimo e Dívida
+    subcategoria: Empréstimo de Dinheiro a Terceiros
+    palavras:
+      - emprestimo a
+      - empréstimo a
+      - emprestar para
+  
+  - categoria: Empréstimo e Dívida
+    subcategoria: Reembolso
+    palavras:
+      - reembolso de emprestimo
+      - reembolso de empréstimo
+      - pagamento de emprestimo
+      - pagamento de empréstimo
+  
+  - categoria: Empréstimo e Dívida
+    subcategoria: Cobrança de Dívida
+    palavras:
+      - cobranca
+      - cobrança
+      - recebimento de divida
+      - recebimento de dívida
+  
+  # ----- DIVERSOS -----
+  - categoria: Diversos
+    subcategoria: Despesa Paga do Próprio Bolso
+    palavras:
+      - proprio bolso
+      - próprio bolso
+      - reembolsavel
+      - reembolsável
+  
+  - categoria: Diversos
+    subcategoria: Reembolso
+    palavras:
+      - reembolso transferencia
+      - reembolso transferência
+  
+  - categoria: Diversos
+    subcategoria: Outra Transferência
+    palavras:
+      - outra transferencia
+      - outra transferindoença
+      - aplicacao
+      - aplicação
+      - investimento
+      - tesouro

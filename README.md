@@ -1,6 +1,6 @@
 # OFX/CSV Multi-Format to ezBookkeeping Converter v5.0
 
-Conversor automático de múltiplos formatos financeiros para ezBookkeeping (**CSV** + **QIF**).
+Conversor automático de múltiplos formatos financeiros para ezBookkeeping (CSV + QIF).
 
 **Formatos Suportados:**
 - OFX/QFX (bancos brasileiros)
@@ -10,10 +10,11 @@ Conversor automático de múltiplos formatos financeiros para ezBookkeeping (**C
 - XP Cartão de Crédito CSV
 
 **Novidades v5.0:**
-- Suporte Rico CSV e XLSX
-- Suporte XP Cartão de Crédito
-- Detecção automática de formato por header
-- Todas transações com subcategorias
+- Suporte completo a XP Cartão de Crédito CSV
+- Categorização totalmente alinhada com ezBookkeeping
+- Detecção automática por header (BOM-safe)
+- Formatação inteligente de parcelas
+- 100% das categorias e subcategorias do ezBookkeeping
 
 ---
 
@@ -36,16 +37,25 @@ Conversor automático de múltiplos formatos financeiros para ezBookkeeping (**C
 
 **100% Configurável via YAML** - sem código Python!
 
-- Transferências: Pix, TED, DOC entre contas
-- Receitas: Salário, Dividendos, Estornos
-- Despesas: Compras, Boletos, Alimentação, Saúde, etc.
-- Categoria + Subcategoria em tudo (compatível com ezBookkeeping)
+**Estrutura ezBookkeeping completa:**
+
+Receitas: Ganhos Ocupacionais, Finanças & Investimento, Diversos
+- Ganhos Ocupacionais: Renda de Salário, Renda de Bônus, Pagamento de Hora Extra, Renda de Trabalho Paralelo, Estorno
+- Finanças & Investimento: Renda de Investimento, Renda de Aluguel, Rendimento de Juros
+- Diversos: Renda de Presente e Dinheiro da Sorte, Renda de Prêmios, Ganho Extraordinário, Outras Receitas, Reembolso
+
+Despesas: Comida e Bebida, Vestuário e Aparência, Moradia e Utensílios Domésticos, Transporte, Comunicação, Entretenimento, Educação & Estudos, Presentes & Doações, Médico & Saúde, Finanças & Seguro, Diversos
+
+Transferências: Transferência Geral, Empréstimo e Dívida, Diversos
+- Transferência Geral: Transferência Bancária, Pagamento de Cartão de Crédito, Depósitos e Saques
 
 **Exemplos:**
 ```
-Rendimentos                         → Renda de Investimento > Rendimento de Juros
-Pagamento com QR Pix AMAZON        → Compras > Compras Online
-Transacao Pix enviada Carine       → Transferência Geral > Transferência Bancária
+Rendimentos                         → Finanças & Investimento > Rendimento de Juros
+WELLHUB GYMPASS BR                  → Entretenimento > Esporte & Fitness
+Pagamento de fatura                 → Diversos > Outras Despesas (ajustar manualmente)
+PETLOVE*CLUBE                       → Entretenimento > Despesa com Animais de Estimação
+Transacao Pix enviada Carine        → Transferência Geral > Transferência Bancária
 ```
 
 ### Automação
@@ -139,13 +149,15 @@ cp Rico_investimento_Carine_extrato_de_01-11-2025_ate_30-11-2025.xlsx entrada/
 # Arquivos gerados em convertido/MM-YYYY/
 ```
 
-#### XP Cartão de Crédito
+#### XP Cartão de Crédito CSV
 ```bash
-# Copiar CSV do cartão XP para entrada/
-cp fatura_xp_outubro.csv entrada/
+# Copiar CSV de fatura XP para entrada/
+cp Fatura_XP_CC_2025-11-15.csv entrada/
 
 # Detecção automática pelo header (Data;Estabelecimento;Portador;Valor;Parcela)
-# Parcelas incluídas na descrição
+# Descrições formatadas: "PORTADOR - ESTABELECIMENTO (parcela X/Y)"
+# Datas convertidas: DD/MM/YYYY → YYYY-MM-DD HH:MM:SS
+# BOM handling automático (UTF-8 with signature)
 # Arquivos gerados em convertido/MM-YYYY/
 ```
 
@@ -727,7 +739,15 @@ print(f"Subcategory: {result['subcategory']}")
 
 ## Histórico de Versões
 
-### v4.0 (Atual)
+### v5.0 (Atual)
+- Suporte completo a XP Cartão de Crédito CSV
+- Categorização 100% alinhada com ezBookkeeping
+- Todas categorias e subcategorias do ezBookkeeping implementadas
+- BOM handling automático (UTF-8 with signature)
+- Formatação inteligente de parcelas em descrições
+- Correção de keywords genéricas causando falsos positivos
+
+### v4.0
 - Suporte a Mercado Pago CSV
 - Geração CSV ezBookkeeping (além de QIF)
 - Subcategorias em receitas/despesas

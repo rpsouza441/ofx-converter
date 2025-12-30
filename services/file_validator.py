@@ -68,19 +68,21 @@ class FileValidator:
         filename_lower = file_path.stem.lower()
         return 'rico' in filename_lower and 'investimento' in filename_lower
     
-    def is_valid_xp_cartao_csv(self, file_path: Path) -> bool:
+    def is_valid_xp_cc_csv(self, file_path: Path) -> bool:
         """
-        Verifica se é um arquivo CSV de cartão de crédito da XP
+        Verifica se é um arquivo CSV de fatura XP CC
         
         Args:
             file_path: Path do arquivo a validar
             
         Returns:
-            True se arquivo CSV tem header XP
+            True se arquivo CSV tem o cabeçalho do XP CC
         """
-        from services.xp_cartao_parser import XPCartaoParser
-        
         if file_path.suffix.lower() != '.csv':
             return False
         
-        return XPCartaoParser.is_xp_cartao_csv(file_path)
+        # Importar aqui para evitar circular import
+        from services.xp_cc_parser import XPCCParser
+        
+        # Detectar pelo cabeçalho do arquivo
+        return XPCCParser.is_xp_cc_csv(file_path)
