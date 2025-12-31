@@ -24,7 +24,8 @@ from services import (
     EZBookkeepingCSVWriter,
     RicoParser,
     RicoInvestimentoParser,
-    XPCCParser
+    XPCCParser,
+    AccountMatcher
 )
 
 # Configurar logging
@@ -91,6 +92,12 @@ class OFXConverter:
             self.date_extractor
         )
         
+        # Account Matcher (identifica conta pelo nome do arquivo)
+        contas_file = Path('/app/contas.yaml')
+        self.account_matcher = AccountMatcher(
+            config_file=str(contas_file) if contas_file.exists() else None
+        )
+        
         logger.info("OFX Converter v5.0 iniciado")
         logger.info(f"Monitorando pasta: {self.entrada_dir}")
         logger.info(f"Arquivos lidos organizados por mes em: {self.lido_dir}")
@@ -144,6 +151,9 @@ class OFXConverter:
                 transactions = self.ofx_parser.parse_with_regex(content)
             
             if transactions:
+                # Identificar conta pelo nome do arquivo
+                account_name = self.account_matcher.match_account(ofx_file.name) or ''
+                
                 # ====== ESCREVER CSV ======
                 csv_writer = EZBookkeepingCSVWriter()
                 csv_writer.create_csv_file(csv_path)
@@ -155,7 +165,8 @@ class OFXConverter:
                             txn['amount'],
                             txn['description'],
                             txn['category'],
-                            txn['subcategory']
+                            txn['subcategory'],
+                            account_name
                         )
                     elif txn['type'] == 'expense':
                         csv_writer.write_expense(
@@ -163,7 +174,8 @@ class OFXConverter:
                             txn['amount'],
                             txn['description'],
                             txn['category'],
-                            txn['subcategory']
+                            txn['subcategory'],
+                            account_name
                         )
                     elif txn['type'] == 'income':
                         csv_writer.write_income(
@@ -171,8 +183,10 @@ class OFXConverter:
                             txn['amount'],
                             txn['description'],
                             txn['category'],
-                            txn['subcategory']
+                            txn['subcategory'],
+                            account_name
                         )
+
                 
                 csv_writer.close()
                 logger.info(f"CSV ezBookkeeping salvo em: {csv_path}")
@@ -249,6 +263,9 @@ class OFXConverter:
             csv_path = convertido_month_folder / csv_output_filename
             qif_path = convertido_month_folder / qif_output_filename
             
+            # Identificar conta pelo nome do arquivo
+            account_name = self.account_matcher.match_account(csv_file.name) or ''
+            
             # ====== ESCREVER CSV ======
             csv_writer = EZBookkeepingCSVWriter()
             csv_writer.create_csv_file(csv_path)
@@ -260,7 +277,8 @@ class OFXConverter:
                         txn['amount'],
                         txn['description'],
                         txn['category'],
-                        txn['subcategory']
+                        txn['subcategory'],
+                        account_name
                     )
                 elif txn['type'] == 'expense':
                     csv_writer.write_expense(
@@ -268,7 +286,8 @@ class OFXConverter:
                         txn['amount'],
                         txn['description'],
                         txn['category'],
-                        txn['subcategory']
+                        txn['subcategory'],
+                        account_name
                     )
                 elif txn['type'] == 'income':
                     csv_writer.write_income(
@@ -276,7 +295,8 @@ class OFXConverter:
                         txn['amount'],
                         txn['description'],
                         txn['category'],
-                        txn['subcategory']
+                        txn['subcategory'],
+                        account_name
                     )
             
             csv_writer.close()
@@ -346,6 +366,9 @@ class OFXConverter:
             csv_path = convertido_month_folder / csv_output_filename
             qif_path = convertido_month_folder / qif_output_filename
             
+            # Identificar conta pelo nome do arquivo
+            account_name = self.account_matcher.match_account(csv_file.name) or ''
+            
             # ====== ESCREVER CSV ======
             csv_writer = EZBookkeepingCSVWriter()
             csv_writer.create_csv_file(csv_path)
@@ -357,7 +380,8 @@ class OFXConverter:
                         txn['amount'],
                         txn['description'],
                         txn['category'],
-                        txn['subcategory']
+                        txn['subcategory'],
+                        account_name
                     )
                 elif txn['type'] == 'expense':
                     csv_writer.write_expense(
@@ -365,7 +389,8 @@ class OFXConverter:
                         txn['amount'],
                         txn['description'],
                         txn['category'],
-                        txn['subcategory']
+                        txn['subcategory'],
+                        account_name
                     )
                 elif txn['type'] == 'income':
                     csv_writer.write_income(
@@ -373,7 +398,8 @@ class OFXConverter:
                         txn['amount'],
                         txn['description'],
                         txn['category'],
-                        txn['subcategory']
+                        txn['subcategory'],
+                        account_name
                     )
             
             csv_writer.close()
@@ -448,6 +474,9 @@ class OFXConverter:
             csv_path = convertido_month_folder / csv_output_filename
             qif_path = convertido_month_folder / qif_output_filename
             
+            # Identificar conta pelo nome do arquivo
+            account_name = self.account_matcher.match_account(csv_file.name) or ''
+            
             # ====== ESCREVER CSV ======
             csv_writer = EZBookkeepingCSVWriter()
             csv_writer.create_csv_file(csv_path)
@@ -459,7 +488,8 @@ class OFXConverter:
                         txn['amount'],
                         txn['description'],
                         txn['category'],
-                        txn['subcategory']
+                        txn['subcategory'],
+                        account_name
                     )
                 elif txn['type'] == 'expense':
                     csv_writer.write_expense(
@@ -467,7 +497,8 @@ class OFXConverter:
                         txn['amount'],
                         txn['description'],
                         txn['category'],
-                        txn['subcategory']
+                        txn['subcategory'],
+                        account_name
                     )
                 elif txn['type'] == 'income':
                     csv_writer.write_income(
@@ -475,7 +506,8 @@ class OFXConverter:
                         txn['amount'],
                         txn['description'],
                         txn['category'],
-                        txn['subcategory']
+                        txn['subcategory'],
+                        account_name
                     )
             
             csv_writer.close()
@@ -545,6 +577,9 @@ class OFXConverter:
             csv_path = convertido_month_folder / csv_output_filename
             qif_path = convertido_month_folder / qif_output_filename
             
+            # Identificar conta pelo nome do arquivo
+            account_name = self.account_matcher.match_account(xlsx_file.name) or ''
+            
             # ====== ESCREVER CSV ======
             csv_writer = EZBookkeepingCSVWriter()
             csv_writer.create_csv_file(csv_path)
@@ -556,7 +591,8 @@ class OFXConverter:
                         txn['amount'],
                         txn['description'],
                         txn['category'],
-                        txn['subcategory']
+                        txn['subcategory'],
+                        account_name
                     )
                 elif txn['type'] == 'expense':
                     csv_writer.write_expense(
@@ -564,7 +600,8 @@ class OFXConverter:
                         txn['amount'],
                         txn['description'],
                         txn['category'],
-                        txn['subcategory']
+                        txn['subcategory'],
+                        account_name
                     )
                 elif txn['type'] == 'income':
                     csv_writer.write_income(
@@ -572,7 +609,8 @@ class OFXConverter:
                         txn['amount'],
                         txn['description'],
                         txn['category'],
-                        txn['subcategory']
+                        txn['subcategory'],
+                        account_name
                     )
             
             csv_writer.close()

@@ -16,6 +16,7 @@ services:
       - "./ofx_converter.py:/app/ofx_converter.py"
       - "./services:/app/services"
       - "./categorias.yaml:/app/categorias.yaml"
+      - "./contas.yaml:/app/contas.yaml"
     environment:
       - TZ=America/Sao_Paulo
       - WATCH_INTERVAL=5  # Intervalo em segundos para verificar novos arquivos

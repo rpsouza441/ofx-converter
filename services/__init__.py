@@ -17,6 +17,7 @@ from services.ezbookkeeping_csv_writer import EZBookkeepingCSVWriter
 from services.rico_parser import RicoParser
 from services.rico_investimento_parser import RicoInvestimentoParser
 from services.xp_cc_parser import XPCCParser
+from services.account_matcher import AccountMatcher
 
 
 __all__ = [
@@ -31,7 +32,8 @@ __all__ = [
     'EZBookkeepingCSVWriter',
     'RicoParser',
     'RicoInvestimentoParser',
-    'XPCCParser'
+    'XPCCParser',
+    'AccountMatcher'
 ]
 
 __version__ = '3.0.0'

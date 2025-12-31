@@ -42,6 +42,9 @@ logs/
 # Docker
 .env
 
+# Configuração pessoal de contas (não commitar)
+contas.yaml
+
 # Backup files
 *.bak
 *.backup

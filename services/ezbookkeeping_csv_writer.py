@@ -58,7 +58,7 @@ class EZBookkeepingCSVWriter:
     def write_transfer(self, date, amount: str, description: str,
                       category: str = 'Transferência Geral',
                       subcategory: str = 'Transferência Bancária',
-                      tags: str = ''):
+                      account: str = '', tags: str = ''):
         """
         Escreve uma transação de transferência
         
@@ -68,9 +68,10 @@ class EZBookkeepingCSVWriter:
             description: Descrição da transferência
             category: Categoria (default: Transferência Geral)
             subcategory: Subcategoria (default: Transferência Bancária)
+            account: Nome da conta (opcional)
             tags: Tags opcionais
         
-        Note: Account e Account2 ficam vazios para preenchimento manual
+        Note: Account2 fica vazio para preenchimento manual
         """
         # Date já vem como string 'YYYY-MM-DD' ou 'YYYY-MM-DD HH:MM:SS'
         time_str = str(date)
@@ -84,7 +85,7 @@ class EZBookkeepingCSVWriter:
             'Transfer',                  # Type
             category,                    # Category
             subcategory,                 # Sub Category
-            '',                          # Account (vazio - usuário preenche)
+            account,                     # Account (pode ser preenchido via matcher)
             self.currency,               # Account Currency
             f"{amount_val:.2f}",        # Amount
             '',                          # Account2 (vazio - usuário preenche)
@@ -98,7 +99,7 @@ class EZBookkeepingCSVWriter:
         self.writer.writerow(row)
     
     def write_expense(self, date, amount: str, description: str,
-                     category: str, subcategory: str = '', tags: str = ''):
+                     category: str, subcategory: str = '', account: str = '', tags: str = ''):
         """
         Escreve uma transação de despesa
         
@@ -108,9 +109,8 @@ class EZBookkeepingCSVWriter:
             description: Descrição da despesa
             category: Categoria da despesa
             subcategory: Subcategoria (opcional)
+            account: Nome da conta (opcional)
             tags: Tags opcionais
-        
-        Note: Account fica vazio para preenchimento manual
         """
         # Date já vem como string 'YYYY-MM-DD' ou 'YYYY-MM-DD HH:MM:SS'
         time_str = str(date)
@@ -124,7 +124,7 @@ class EZBookkeepingCSVWriter:
             'Expense',                   # Type
             category,                    # Category
             subcategory,                 # Sub Category
-            '',                          # Account (vazio - usuário preenche)
+            account,                     # Account (pode ser preenchido via matcher)
             self.currency,               # Account Currency
             f"{amount_val:.2f}",        # Amount
             '',                          # Account2
@@ -138,7 +138,7 @@ class EZBookkeepingCSVWriter:
         self.writer.writerow(row)
     
     def write_income(self, date, amount: str, description: str,
-                    category: str, subcategory: str = '', tags: str = ''):
+                    category: str, subcategory: str = '', account: str = '', tags: str = ''):
         """
         Escreve uma transação de receita
         
@@ -148,9 +148,8 @@ class EZBookkeepingCSVWriter:
             description: Descrição da receita
             category: Categoria da receita
             subcategory: Subcategoria (opcional)
+            account: Nome da conta (opcional)
             tags: Tags opcionais
-        
-        Note: Account fica vazio para preenchimento manual
         """
         # Date já vem como string 'YYYY-MM-DD' ou 'YYYY-MM-DD HH:MM:SS'
         time_str = str(date)
@@ -164,7 +163,7 @@ class EZBookkeepingCSVWriter:
             'Income',                    # Type
             category,                    # Category
             subcategory,                 # Sub Category
-            '',                          # Account (vazio - usuário preenche)
+            account,                     # Account (pode ser preenchido via matcher)
             self.currency,               # Account Currency
             f"{amount_val:.2f}",        # Amount
             '',                          # Account2

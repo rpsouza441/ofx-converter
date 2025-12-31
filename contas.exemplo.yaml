@@ -1,0 +1,107 @@
+# Configuração de Contas - OFX Converter
+# Este arquivo mapeia palavras-chave no nome do arquivo para contas do ezBookkeeping
+#
+# ESTRUTURA:
+# - conta: Nome exato da conta no ezBookkeeping
+#   titular: [lista de palavras-chave do titular - case insensitive]
+#   banco: [lista de palavras-chave do banco - case insensitive]
+#   tipo: [lista de palavras-chave do tipo - case insensitive]
+#   prioridade: número (maior = mais prioritário, usado para desempate)
+#
+# LÓGICA DE MATCHING:
+# 1. O sistema procura no nome do arquivo por palavras-chave de titular, banco e tipo
+# 2. A conta que tiver TODAS as palavras-chave correspondentes é selecionada
+# 3. Se múltiplas contas corresponderem, a de maior prioridade vence
+# 4. Se nenhuma conta corresponder, o campo Account fica vazio
+
+# ==================== CONTAS CORRENTES ====================
+contas_correntes:
+  - conta: "Banco do Brasil Exemplo"
+    titular: [exemplo, joao]
+    banco: [bb, bancodobrasil]
+    tipo: [extrato, conta]
+    prioridade: 10
+
+  - conta: "Itaú Exemplo"
+    titular: [exemplo, joao]
+    banco: [itau]
+    tipo: [extrato, conta]
+    prioridade: 10
+
+# ==================== CARTÕES DE CRÉDITO ====================
+cartoes_credito:
+  - conta: "CC NuBank Exemplo"
+    titular: [exemplo, joao]
+    banco: [nubank, nu]
+    tipo: [cc, fatura, cartao]
+    prioridade: 20
+
+  - conta: "CC XP Exemplo"
+    titular: [exemplo, joao]
+    banco: [xp]
+    tipo: [cc, fatura, cartao]
+    prioridade: 20
+
+# ==================== CONTAS VIRTUAIS ====================
+contas_virtuais:
+  - conta: "NuConta Exemplo"
+    titular: [exemplo, joao]
+    banco: [nubank, nu]
+    tipo: [extrato, conta, nuconta]
+    prioridade: 10
+
+  - conta: "MercadoPago Exemplo"
+    titular: [exemplo, joao]
+    banco: [mercadopago, mp]
+    tipo: [extrato, conta]
+    prioridade: 10
+
+  - conta: "Conta Digital Rico Exemplo"
+    titular: [exemplo, joao]
+    banco: [rico]
+    tipo: [extrato, conta, digital]
+    prioridade: 10
+
+  - conta: "Conta Digital XP Exemplo"
+    titular: [exemplo, joao]
+    banco: [xp]
+    tipo: [extrato, conta, digital]
+    prioridade: 10
+
+  - conta: "Conta Inter Exemplo"
+    titular: [exemplo, joao]
+    banco: [inter]
+    tipo: [extrato, conta]
+    prioridade: 10
+
+# ==================== CONTAS DE INVESTIMENTO ====================
+contas_investimento:
+  - conta: "Investimentos NuBank Exemplo"
+    titular: [exemplo, joao]
+    banco: [nubank, nu]
+    tipo: [investimento, investimentos]
+    prioridade: 30
+
+  - conta: "Investimentos Rico Exemplo"
+    titular: [exemplo, joao]
+    banco: [rico]
+    tipo: [investimento, investimentos]
+    prioridade: 30
+
+  - conta: "Investimentos XP Exemplo"
+    titular: [exemplo, joao]
+    banco: [xp]
+    tipo: [investimento, investimentos]
+    prioridade: 30
+
+  - conta: "Investimentos Inter Exemplo"
+    titular: [exemplo, joao]
+    banco: [inter]
+    tipo: [investimento, investimentos]
+    prioridade: 30
+
+  - conta: "Investimentos MercadoPago Exemplo"
+    titular: [exemplo, joao]
+    banco: [mercadopago, mp]
+    tipo: [investimento, investimentos]
+    prioridade: 30

@@ -165,7 +165,7 @@ class TransactionCategorizer:
                 for rule in rules['receitas']:
                     category = rule['categoria']
                     subcategory = rule.get('subcategoria', '')
-                    keywords = rule['palavras']
+                    keywords = [k.lower() for k in rule['palavras']]
                     self.add_income_rule(category, subcategory, keywords)
             
             # Carregar despesas
@@ -173,7 +173,7 @@ class TransactionCategorizer:
                 for rule in rules['despesas']:
                     category = rule['categoria']
                     subcategory = rule.get('subcategoria', '')
-                    keywords = rule['palavras']
+                    keywords = [k.lower() for k in rule['palavras']]
                     self.add_expense_rule(category, subcategory, keywords)
             
             # Carregar transferências
@@ -181,7 +181,7 @@ class TransactionCategorizer:
                 for rule in rules['transferencias']:
                     category = rule['categoria']
                     subcategory = rule.get('subcategoria', '')
-                    keywords = rule['palavras']
+                    keywords = [k.lower() for k in rule['palavras']]
                     self.add_transfer_rule(category, subcategory, keywords)
             
             logger.info(f"Regras carregadas de: {file_path}")
