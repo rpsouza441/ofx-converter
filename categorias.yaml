@@ -119,6 +119,8 @@ despesas:
       - açougue
       - hortifruti
       - muffato
+      - SACOLAO POPULAR
+      - PPFIT
   
   - categoria: Comida e Bebida
     subcategoria: Bebida
@@ -332,10 +334,9 @@ despesas:
       - academia
       - gym
       - fitness
-      - wellhub
-      - gympass
       - esporte
       - crossfit
+
   
   - categoria: Entretenimento
     subcategoria: Despesa de Festa
@@ -458,6 +459,12 @@ despesas:
       - exame médico
       - laboratorio
       - laboratório
+      - plano de saude
+      - plano de saúde
+      - unimed
+      - amil
+      - sulamerica
+      - sulamerica
   
   - categoria: Médico & Saúde
     subcategoria: Medicamentos
@@ -481,12 +488,9 @@ despesas:
   - categoria: Médico & Saúde
     subcategoria: Academia
     palavras:
-      - plano de saude
-      - plano de saúde
-      - unimed
-      - amil
-      - sulamerica
-      - sulamerica
+      - 41 FIT
+      - wellhub
+      - gympass
   
   # ----- FINANÇAS & SEGURO -----
   - categoria: Finanças & Seguro
@@ -563,6 +567,8 @@ transferencias:
       - pix recebido de
       - pix enviado para
       - pix devolvido
+      - pix - enviado
+      - pix - recebido
       - transferencia bancaria
       - transferência bancária
       - operacoes em bolsa
