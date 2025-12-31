@@ -229,23 +229,40 @@ class XPCCParser:
     
     def _categorize_transaction(self, description: str, amount: float) -> dict:
         """
-        Categoriza transação usando categorize_smart do categorizer
+        Categoriza transação usando as regras do categorizer
         
         Args:
             description: Descrição da transação
-            amount: Valor da transação
+            amount: Valor da transação (negativo = estorno/pagamento)
             
         Returns:
             Dict com type, category, subcategory, qif_category
         """
-        # Para cartão de crédito, precisamos buscar diretamente nas regras de despesa
-        # porque categorize_smart usa o sinal do amount, e todas as compras no cartão são positivas
-        
         description_lower = description.lower()
         
-        # Buscar nas regras de despesa do categorizer
+        # Se valor for negativo, é estorno ou pagamento de fatura (Income)
+        if amount < 0:
+            # Buscar nas regras de receita do categorizer
+            for rule in self.categorizer.income_rules:
+                keywords = [str(k).lower() for k in rule['keywords']]
+                if any(keyword in description_lower for keyword in keywords):
+                    return {
+                        'type': 'income',
+                        'category': rule['category'],
+                        'subcategory': rule.get('subcategory', ''),
+                        'qif_category': rule['category']
+                    }
+            
+            # Fallback para estornos: Diversos > Reembolso
+            return {
+                'type': 'income',
+                'category': 'Diversos',
+                'subcategory': 'Reembolso',
+                'qif_category': 'Diversos'
+            }
+        
+        # Para valores positivos (compras), buscar nas regras de despesa
         for rule in self.categorizer.expense_rules:
-            # Converter keywords para string para evitar erro de tipo
             keywords = [str(k).lower() for k in rule['keywords']]
             if any(keyword in description_lower for keyword in keywords):
                 return {
@@ -255,7 +272,7 @@ class XPCCParser:
                     'qif_category': rule['category']
                 }
         
-        # Fallback: Diversas > Outras Despesas
+        # Fallback: Diversos > Outras Despesas
         return {
             'type': 'expense',
             'category': 'Diversos',
