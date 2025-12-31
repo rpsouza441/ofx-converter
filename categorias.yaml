@@ -260,7 +260,7 @@ despesas:
     subcategoria: Táxi & Aluguel de Carro
     palavras:
       - uber
-      - 99
+      - "99"
       - taxi
       - táxi
       - cabify
@@ -388,6 +388,7 @@ despesas:
       - animal
       - petlove
       - petonline
+      - TOTORACOES
   
   - categoria: Entretenimento
     subcategoria: Viagens
@@ -580,6 +581,20 @@ transferencias:
       - depósito
       - saque
       - retirada
+
+  - categoria: Transferência Geral
+    subcategoria: Investimento / Aplicação
+    palavras:
+      - nota bov
+      - debito b3
+      - operacao bovespa
+      - operação bovespa
+      - compra de acoes
+      - compra de ações
+      - aplicacao
+      - aplicação
+      - resgate
+      - tesouro direto
   
   # ----- EMPRÉSTIMO E DÍVIDA -----
   - categoria: Empréstimo e Dívida
