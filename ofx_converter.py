@@ -585,10 +585,8 @@ class OFXConverter:
             # Usar nome original do CSV (sem extensão)
             base_filename = csv_file.stem
             csv_output_filename = f'{base_filename}.csv'
-            qif_output_filename = f'{base_filename}.qif'
             
             csv_path = convertido_month_folder / csv_output_filename
-            qif_path = convertido_month_folder / qif_output_filename
             
             # Identificar conta pelo nome do arquivo
             account_name = self.account_matcher.match_account(csv_file.name) or ''
@@ -628,21 +626,6 @@ class OFXConverter:
             
             csv_writer.close()
             logger.info(f"CSV ezBookkeeping salvo em: {csv_path}")
-            
-            # ====== ESCREVER QIF ======
-            qif_writer = QIFWriter()
-            qif_writer.create_qif_file(qif_path)
-            
-            for txn in transactions:
-                qif_writer.write_transaction(
-                    txn['date'],
-                    txn['amount'],
-                    txn['description'],
-                    txn['qif_category']
-                )
-            
-            qif_writer.close()
-            logger.info(f"QIF salvo em: {qif_path}")
             
             # Mover arquivo para lido
             lido_path = lido_month_folder / csv_file.name

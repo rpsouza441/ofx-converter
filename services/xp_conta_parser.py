@@ -132,8 +132,7 @@ class XPContaParser:
                 'description': description,
                 'type': cat_info['type'],
                 'category': cat_info['category'],
-                'subcategory': cat_info['subcategory'],
-                'qif_category': cat_info['qif_category']
+                'subcategory': cat_info['subcategory']
             }
             
         except Exception as e:
