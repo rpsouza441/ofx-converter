@@ -129,19 +129,36 @@ class DateExtractor:
     
     def parse_ofx_date(self, date_str: str) -> str:
         """
-        Parse data do OFX (YYYYMMDD) para formato YYYY-MM-DD
+        Parse data do OFX para formato YYYY-MM-DD HH:MM:SS
+        
+        OFX pode ter formatos:
+        - YYYYMMDD (apenas data)
+        - YYYYMMDDHHMMSS (data e hora)
+        - YYYYMMDDHHMMSS[timezone] (data, hora e timezone)
         
         Args:
-            date_str: Data em formato OFX (ex: 20251108)
+            date_str: Data em formato OFX (ex: 20251108 ou 20251108120000)
             
         Returns:
-            Data formatada YYYY-MM-DD ou string vazia se inválida
+            Data formatada YYYY-MM-DD HH:MM:SS ou string vazia se inválida
         """
         try:
+            # Remover timezone se presente (ex: [-3:BRT])
+            date_str = date_str.split('[')[0].strip()
+            
             if len(date_str) >= 8:
                 year = int(date_str[0:4])
                 month = int(date_str[4:6])
                 day = int(date_str[6:8])
+                
+                # Extrair hora se disponível (YYYYMMDDHHMMSS)
+                hour = 0
+                minute = 0
+                second = 0
+                if len(date_str) >= 14:
+                    hour = int(date_str[8:10])
+                    minute = int(date_str[10:12])
+                    second = int(date_str[12:14])
                 
                 # Corrigir ano invalido
                 if year < 1900:
@@ -153,8 +170,16 @@ class DateExtractor:
                 if day > 31 or day == 0:
                     day = 1
                 
-                date_obj = datetime(year, month, day)
-                return date_obj.strftime('%Y-%m-%d')
+                # Validar hora
+                if hour > 23:
+                    hour = 0
+                if minute > 59:
+                    minute = 0
+                if second > 59:
+                    second = 0
+                
+                date_obj = datetime(year, month, day, hour, minute, second)
+                return date_obj.strftime('%Y-%m-%d %H:%M:%S')
             
             return ''
         except Exception as e:

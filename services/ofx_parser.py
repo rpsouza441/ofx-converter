@@ -49,7 +49,7 @@ class OFXParser:
             
             for account in ofx.accounts:
                 for txn in account.statement.transactions:
-                    date = txn.date.strftime('%Y-%m-%d')
+                    date = txn.date.strftime('%Y-%m-%d %H:%M:%S')
                     amount = str(txn.amount)
                     
                     # Extrair payee e memo
