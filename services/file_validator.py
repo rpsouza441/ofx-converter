@@ -86,3 +86,22 @@ class FileValidator:
         
         # Detectar pelo cabeçalho do arquivo
         return XPCCParser.is_xp_cc_csv(file_path)
+    
+    def is_valid_xp_conta_csv(self, file_path: Path) -> bool:
+        """
+        Verifica se é um arquivo CSV de extrato da conta digital XP
+        
+        Args:
+            file_path: Path do arquivo a validar
+            
+        Returns:
+            True se arquivo CSV tem o cabeçalho da conta XP
+        """
+        if file_path.suffix.lower() != '.csv':
+            return False
+        
+        # Importar aqui para evitar circular import
+        from services.xp_conta_parser import XPContaParser
+        
+        # Detectar pelo cabeçalho do arquivo
+        return XPContaParser.is_xp_conta_csv(file_path)

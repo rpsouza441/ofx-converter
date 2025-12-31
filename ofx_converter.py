@@ -25,6 +25,7 @@ from services import (
     RicoParser,
     RicoInvestimentoParser,
     XPCCParser,
+    XPContaParser,
     AccountMatcher
 )
 
@@ -92,6 +93,13 @@ class OFXConverter:
             self.date_extractor
         )
         
+        # Parser XP Conta Digital CSV
+        self.xp_conta_parser = XPContaParser(
+            self.text_normalizer,
+            self.categorizer,
+            self.date_extractor
+        )
+        
         # Account Matcher (identifica conta pelo nome do arquivo)
         contas_file = Path('/app/contas.yaml')
         self.account_matcher = AccountMatcher(
@@ -102,7 +110,7 @@ class OFXConverter:
         logger.info(f"Monitorando pasta: {self.entrada_dir}")
         logger.info(f"Arquivos lidos organizados por mes em: {self.lido_dir}")
         logger.info(f"Arquivos convertidos organizados por mes em: {self.convertido_dir}")
-        logger.info("Formatos suportados: OFX/QFX, Mercado Pago CSV, Rico CSV/XLSX, XP CC CSV")
+        logger.info("Formatos suportados: OFX/QFX, Mercado Pago CSV, Rico CSV/XLSX, XP CC/Conta CSV")
         logger.info("Categorizacao automatica alinhada com ezBookkeeping")
     
     def create_month_folder(self, base_dir: Path, month_year: str) -> Path:
@@ -541,6 +549,114 @@ class OFXConverter:
             logger.error(f"Erro ao converter CSV XP CC {csv_file.name}: {e}")
             return False
     
+    def convert_xp_conta_file(self, csv_file: Path) -> bool:
+        """
+        Converte um arquivo CSV de extrato da conta digital XP para CSV ezBookkeeping + QIF
+        
+        Args:
+            csv_file: Path do arquivo CSV
+            
+        Returns:
+            True se conversao bem-sucedida
+        """
+        try:
+            # Verificar se é CSV da Conta XP
+            if not XPContaParser.is_xp_conta_csv(csv_file):
+                logger.warning(f"Arquivo CSV não é da Conta XP: {csv_file.name}")
+                return False
+            
+            # Parsear CSV
+            logger.info(f"Convertendo CSV XP Conta: {csv_file.name}")
+            transactions = self.xp_conta_parser.parse_csv(csv_file)
+            
+            if not transactions:
+                logger.error(f"Falha ao parsear CSV XP Conta: {csv_file.name}")
+                return False
+            
+            # Extrair mes-ano das transacoes
+            month_year = self.date_extractor.extract_month_year_from_transactions(
+                [txn['date'] for txn in transactions]
+            )
+            
+            # Criar pastas para o mes-ano
+            lido_month_folder = self.create_month_folder(self.lido_dir, month_year)
+            convertido_month_folder = self.create_month_folder(self.convertido_dir, month_year)
+            
+            # Usar nome original do CSV (sem extensão)
+            base_filename = csv_file.stem
+            csv_output_filename = f'{base_filename}.csv'
+            qif_output_filename = f'{base_filename}.qif'
+            
+            csv_path = convertido_month_folder / csv_output_filename
+            qif_path = convertido_month_folder / qif_output_filename
+            
+            # Identificar conta pelo nome do arquivo
+            account_name = self.account_matcher.match_account(csv_file.name) or ''
+            
+            # ====== ESCREVER CSV ======
+            csv_writer = EZBookkeepingCSVWriter()
+            csv_writer.create_csv_file(csv_path)
+            
+            for txn in transactions:
+                if txn['type'] == 'transfer':
+                    csv_writer.write_transfer(
+                        txn['date'],
+                        txn['amount'],
+                        txn['description'],
+                        txn['category'],
+                        txn['subcategory'],
+                        account_name
+                    )
+                elif txn['type'] == 'expense':
+                    csv_writer.write_expense(
+                        txn['date'],
+                        txn['amount'],
+                        txn['description'],
+                        txn['category'],
+                        txn['subcategory'],
+                        account_name
+                    )
+                elif txn['type'] == 'income':
+                    csv_writer.write_income(
+                        txn['date'],
+                        txn['amount'],
+                        txn['description'],
+                        txn['category'],
+                        txn['subcategory'],
+                        account_name
+                    )
+            
+            csv_writer.close()
+            logger.info(f"CSV ezBookkeeping salvo em: {csv_path}")
+            
+            # ====== ESCREVER QIF ======
+            qif_writer = QIFWriter()
+            qif_writer.create_qif_file(qif_path)
+            
+            for txn in transactions:
+                qif_writer.write_transaction(
+                    txn['date'],
+                    txn['amount'],
+                    txn['description'],
+                    txn['qif_category']
+                )
+            
+            qif_writer.close()
+            logger.info(f"QIF salvo em: {qif_path}")
+            
+            # Mover arquivo para lido
+            lido_path = lido_month_folder / csv_file.name
+            shutil.move(str(csv_file), str(lido_path))
+            
+            logger.info(f"Conversao bem-sucedida: {csv_file.name}")
+            logger.info(f"Arquivo original movido para: {lido_path}")
+            logger.info(f"Organizados na pasta: {month_year}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Erro ao converter CSV XP Conta {csv_file.name}: {e}")
+            return False
+    
     def convert_rico_investimento_file(self, xlsx_file: Path) -> bool:
         """
         Converte um arquivo XLSX de investimentos da Rico para CSV ezBookkeeping + QIF
@@ -662,11 +778,16 @@ class OFXConverter:
         xp_cc_files = [f for f in self.entrada_dir.iterdir()
                        if f.is_file() and self.file_validator.is_valid_xp_cc_csv(f)]
         
-        # Arquivos CSV do Mercado Pago (CSV que NÃO é da Rico nem XP CC)
+        # Arquivos CSV da Conta Digital XP (tem cabeçalho específico)
+        xp_conta_files = [f for f in self.entrada_dir.iterdir()
+                         if f.is_file() and self.file_validator.is_valid_xp_conta_csv(f)]
+        
+        # Arquivos CSV do Mercado Pago (CSV que NÃO é da Rico, XP CC ou XP Conta)
         csv_files = [f for f in self.entrada_dir.iterdir() 
                      if f.is_file() and self.file_validator.is_valid_mercadopago_csv(f)
                      and not self.file_validator.is_valid_rico_csv(f)
-                     and not self.file_validator.is_valid_xp_cc_csv(f)]
+                     and not self.file_validator.is_valid_xp_cc_csv(f)
+                     and not self.file_validator.is_valid_xp_conta_csv(f)]
         
         if ofx_files:
             logger.info(f"Encontrados {len(ofx_files)} arquivo(s) OFX para converter")
@@ -687,6 +808,11 @@ class OFXConverter:
             logger.info(f"Encontrados {len(xp_cc_files)} arquivo(s) CSV do XP CC para converter")
             for xp_cc_file in xp_cc_files:
                 self.convert_xp_cc_file(xp_cc_file)
+        
+        if xp_conta_files:
+            logger.info(f"Encontrados {len(xp_conta_files)} arquivo(s) CSV da XP Conta para converter")
+            for xp_conta_file in xp_conta_files:
+                self.convert_xp_conta_file(xp_conta_file)
         
         if csv_files:
             logger.info(f"Encontrados {len(csv_files)} arquivo(s) CSV do Mercado Pago para converter")
