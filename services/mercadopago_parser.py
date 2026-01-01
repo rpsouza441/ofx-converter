@@ -154,19 +154,19 @@ class MercadoPagoParser:
     
     def _convert_date(self, date_str: str) -> Optional[str]:
         """
-        Converte data de DD-MM-YYYY para YYYY-MM-DD
+        Converte data de DD-MM-YYYY para YYYY-MM-DD HH:MM:SS
         
         Args:
             date_str: Data no formato DD-MM-YYYY
             
         Returns:
-            Data no formato YYYY-MM-DD ou None se inválida
+            Data no formato YYYY-MM-DD HH:MM:SS ou None se inválida
         """
         try:
             # Parse DD-MM-YYYY
             dt = datetime.strptime(date_str, '%d-%m-%Y')
-            # Retornar YYYY-MM-DD
-            return dt.strftime('%Y-%m-%d')
+            # Retornar YYYY-MM-DD HH:MM:SS (hora padrão 00:00:00)
+            return dt.strftime('%Y-%m-%d 00:00:00')
         except ValueError:
             return None
     
