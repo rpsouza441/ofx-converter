@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Mercado Pago CSV Parser Service
-Responsável por parsear arquivos CSV exportados do Mercado Pago
+XP Conta Digital CSV Parser Service
+Responsável por parsear arquivos CSV de extrato da conta digital XP
 """
 
 import csv
@@ -15,11 +15,11 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 
-class MercadoPagoParser:
-    """Parser de arquivos CSV do Mercado Pago com suporte a transferências Pix"""
+class XPContaParser:
+    """Parser de arquivos CSV de extrato da conta digital XP"""
     
-    # Identificador único do CSV do Mercado Pago
-    EXPECTED_HEADER = "RELEASE_DATE;TRANSACTION_TYPE;REFERENCE_ID;TRANSACTION_NET_AMOUNT;PARTIAL_BALANCE"
+    # Identificador único do CSV da Conta XP
+    EXPECTED_HEADER = "Data;Descricao;Valor;Saldo"
     
     def __init__(self, text_normalizer, categorizer, date_extractor):
         """
@@ -35,31 +35,27 @@ class MercadoPagoParser:
         self.date_extractor = date_extractor
     
     @staticmethod
-    def is_mercadopago_csv(file_path: Path) -> bool:
+    def is_xp_conta_csv(file_path: Path) -> bool:
         """
-        Verifica se o arquivo é um CSV do Mercado Pago
+        Verifica se o arquivo é um CSV de extrato da conta digital XP
         
         Args:
             file_path: Path do arquivo CSV
             
         Returns:
-            True se for CSV do Mercado Pago
+            True se for CSV de extrato da conta digital XP
         """
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                # Pular primeiras 3 linhas (resumo)
-                for _ in range(3):
-                    f.readline()
-                # Linha 4 deve conter o cabeçalho
+            with open(file_path, 'r', encoding='utf-8-sig') as f:
                 header = f.readline().strip()
-                return header == MercadoPagoParser.EXPECTED_HEADER
+                return header == XPContaParser.EXPECTED_HEADER
         except Exception as e:
-            logger.debug(f"Erro ao verificar CSV Mercado Pago: {e}")
+            logger.debug(f"Erro ao verificar CSV XP Conta: {e}")
             return False
     
     def parse_csv(self, file_path: Path) -> Optional[List[Dict]]:
         """
-        Parse do arquivo CSV do Mercado Pago
+        Parse do arquivo CSV de extrato da conta digital XP
         
         Args:
             file_path: Path do arquivo CSV
@@ -70,37 +66,29 @@ class MercadoPagoParser:
         try:
             transactions = []
             
-            with open(file_path, 'r', encoding='utf-8') as f:
-                # Pular primeiras 3 linhas (resumo com saldo inicial/final)
-                for _ in range(3):
-                    f.readline()
-                
-                # Ler cabeçalho
+            with open(file_path, 'r', encoding='utf-8-sig') as f:
                 header = f.readline().strip()
                 if header != self.EXPECTED_HEADER:
                     logger.error(f"Cabeçalho CSV inválido: {header}")
                     return None
                 
-                # Processar transações
                 csv_reader = csv.DictReader(f, delimiter=';', fieldnames=[
-                    'RELEASE_DATE', 'TRANSACTION_TYPE', 'REFERENCE_ID', 
-                    'TRANSACTION_NET_AMOUNT', 'PARTIAL_BALANCE'
+                    'Data', 'Descricao', 'Valor', 'Saldo'
                 ])
                 
                 for row in csv_reader:
-                    # Pular linhas vazias
-                    if not row.get('RELEASE_DATE') or not row['RELEASE_DATE'].strip():
+                    if not row.get('Data') or not row['Data'].strip():
                         continue
                     
                     transaction = self._parse_transaction(row)
                     if transaction:
                         transactions.append(transaction)
             
-            logger.info(f"Parse Mercado Pago concluído: {len(transactions)} transações")
+            logger.info(f"Parse XP Conta concluído: {len(transactions)} transações")
             return transactions if transactions else None
             
         except Exception as e:
-            logger.error(f"Erro no parse CSV Mercado Pago: {e}")
+            logger.error(f"Erro no parse CSV XP Conta: {e}")
             return None
     
     def _parse_transaction(self, row: Dict[str, str]) -> Optional[Dict]:
@@ -114,15 +102,15 @@ class MercadoPagoParser:
             Dicionário com transação formatada ou None se inválida
         """
         try:
-            # Extrair e converter data (DD-MM-YYYY -> YYYY-MM-DD)
-            date_str = row['RELEASE_DATE'].strip()
+            # Extrair e converter data (DD/MM/YY às HH:MM:SS -> YYYY-MM-DD HH:MM:SS)
+            date_str = row['Data'].strip()
             date = self._convert_date(date_str)
             if not date:
                 logger.warning(f"Data inválida: {date_str}")
                 return None
             
             # Extrair descrição
-            description = row['TRANSACTION_TYPE'].strip()
+            description = row['Descricao'].strip()
             if not description:
                 logger.warning("Descrição vazia, pulando transação")
                 return None
@@ -131,11 +119,11 @@ class MercadoPagoParser:
             description = self.text_normalizer.normalize_utf8(description)
             description = self.text_normalizer.clean_memo(description)
             
-            # Extrair e converter valor (formato BR: 1.000,00 -> US: 1000.00)
-            amount_str = row['TRANSACTION_NET_AMOUNT'].strip()
+            # Extrair e converter valor
+            amount_str = row['Valor'].strip()
             amount = self._convert_amount(amount_str)
             
-            # Determinar categoria (com detecção de transferências Pix)
+            # Categorizar transação
             cat_info = self._categorize_transaction(description, amount)
             
             return {
@@ -153,20 +141,25 @@ class MercadoPagoParser:
     
     def _convert_date(self, date_str: str) -> Optional[str]:
         """
-        Converte data de DD-MM-YYYY para YYYY-MM-DD HH:MM:SS
+        Converte data de DD/MM/YY às HH:MM:SS para YYYY-MM-DD HH:MM:SS
         
         Args:
-            date_str: Data no formato DD-MM-YYYY
+            date_str: Data no formato DD/MM/YY às HH:MM:SS
             
         Returns:
             Data no formato YYYY-MM-DD HH:MM:SS ou None se inválida
         """
         try:
-            # Parse DD-MM-YYYY
-            dt = datetime.strptime(date_str, '%d-%m-%Y')
-            # Retornar YYYY-MM-DD HH:MM:SS (hora padrão 00:00:00)
-            return dt.strftime('%Y-%m-%d 00:00:00')
-        except ValueError:
+            # Formato: "13/12/25 às 09:02:56"
+            # Remover " às " e substituir por espaço
+            clean_date = date_str.replace(' às ', ' ')
+            
+            # Parse DD/MM/YY HH:MM:SS
+            dt = datetime.strptime(clean_date, '%d/%m/%y %H:%M:%S')
+            
+            return dt.strftime('%Y-%m-%d %H:%M:%S')
+        except ValueError as e:
+            logger.debug(f"Erro ao converter data '{date_str}': {e}")
             return None
     
     def _convert_amount(self, amount_str: str) -> float:
@@ -174,15 +167,26 @@ class MercadoPagoParser:
         Converte valor do formato brasileiro para float
         
         Args:
-            amount_str: Valor no formato brasileiro (1.000,00)
+            amount_str: Valor no formato brasileiro (R$ 1.000,00 ou -R$ 1.000,00)
             
         Returns:
             Valor como float
         """
         try:
+            # Remover "R$" e espaços
+            clean = amount_str.replace('R$', '').strip()
+            
+            # Verificar sinal negativo (pode estar antes ou depois do R$)
+            is_negative = '-' in clean
+            clean = clean.replace('-', '').strip()
+            
             # Remover pontos de milhar e trocar vírgula por ponto
-            amount_clean = amount_str.replace('.', '').replace(',', '.')
-            return float(amount_clean)
+            clean = clean.replace('.', '').replace(',', '.')
+            
+            amount = float(clean)
+            
+            return -amount if is_negative else amount
+            
         except ValueError:
             logger.warning(f"Valor inválido: {amount_str}, usando 0.00")
             return 0.0
@@ -198,40 +202,5 @@ class MercadoPagoParser:
         Returns:
             Dict com type, category, subcategory
         """
+        # Usar categorize_smart que já considera o sinal do valor
         return self.categorizer.categorize_smart(description, amount)
-    
-    def get_date_for_filename(self, file_path: Path) -> Optional[str]:
-        """
-        Extrai a data da primeira transação para usar no nome do arquivo
-        
-        Args:
-            file_path: Path do arquivo CSV
-            
-        Returns:
-            Data no formato DD-MM-YYYY ou None
-        """
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                # Pular primeiras 3 linhas (resumo)
-                for _ in range(3):
-                    f.readline()
-                
-                # Pular cabeçalho
-                f.readline()
-                
-                # Ler primeira transação
-                csv_reader = csv.DictReader(f, delimiter=';', fieldnames=[
-                    'RELEASE_DATE', 'TRANSACTION_TYPE', 'REFERENCE_ID', 
-                    'TRANSACTION_NET_AMOUNT', 'PARTIAL_BALANCE'
-                ])
-                
-                for row in csv_reader:
-                    date_str = row.get('RELEASE_DATE', '').strip()
-                    if date_str:
-                        return date_str  # Retornar no formato DD-MM-YYYY
-                
-            return None
-            
-        except Exception as e:
-            logger.error(f"Erro ao extrair data do arquivo: {e}")
-            return None
