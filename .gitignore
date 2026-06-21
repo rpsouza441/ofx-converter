@@ -29,6 +29,12 @@ entrada/*.qfx
 entrada/lido/
 convertido/
 logs/
+samples/
+backup_consulta/
+.recycle/
+
+# Personal configuration
+contas.yaml
 
 # Docker
 .env
