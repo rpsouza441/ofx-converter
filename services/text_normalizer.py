@@ -22,7 +22,10 @@ class TextNormalizer:
             'RENDIMENTO': 'Dividendo',
             'Transferencia Recebida': 'Receita Pix',
             'Transferencia recebida': 'Receita Pix',
-            'Transferencia enviada': 'Despesa Pix'
+            'Transferencia enviada': 'Despesa Pix',
+            # Corrige textos que chegam com encoding quebrado em alguns OFX/B3.
+            'FraA§Aµes': 'Fracoes',
+            'FraÃ§Ãµes': 'Fracoes'
         }
     
     def normalize_utf8(self, text: str) -> str:

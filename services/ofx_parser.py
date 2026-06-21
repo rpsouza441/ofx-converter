@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 OFX Parser Service
-Responsável por parsear arquivos OFX e gerar transações para QIF
+Responsável por parsear arquivos OFX e gerar transações categorizadas
 """
 
 import re
@@ -49,7 +49,7 @@ class OFXParser:
             
             for account in ofx.accounts:
                 for txn in account.statement.transactions:
-                    date = txn.date.strftime('%Y-%m-%d')
+                    date = txn.date.strftime('%Y-%m-%d %H:%M:%S')
                     amount = str(txn.amount)
                     
                     # Extrair payee e memo
@@ -74,15 +74,21 @@ class OFXParser:
                     
                     # Limpar descricao
                     description = self.text_normalizer.clean_memo(description)
+
+                    if self._should_skip_transaction(description):
+                        logger.debug(f"Transacao informativa ignorada: {description}")
+                        continue
                     
-                    # Categorizar
-                    category = self.categorizer.categorize(description, txn.amount)
+                    # Detectar transferências e categorizar
+                    cat_info = self._categorize_ofx_transaction(description, txn.amount)
                     
                     transactions.append({
                         'date': date,
                         'amount': amount,
                         'description': description,
-                        'category': category
+                        'type': cat_info['type'],
+                        'category': cat_info['category'],
+                        'subcategory': cat_info['subcategory']
                     })
             
             logger.info(f"Parse ofxparse concluido: {len(transactions)} transacoes")
@@ -168,15 +174,21 @@ class OFXParser:
                 
                 # Limpar descricao
                 description = self.text_normalizer.clean_memo(description)
+
+                if self._should_skip_transaction(description):
+                    logger.debug(f"Transacao informativa ignorada: {description}")
+                    continue
                 
-                # Categorizar
-                category = self.categorizer.categorize(description, amount)
+                # Detectar transferências e categorizar
+                cat_info = self._categorize_ofx_transaction(description, amount)
                 
                 transactions.append({
                     'date': formatted_date,
                     'amount': amount_str,
                     'description': description,
-                    'category': category
+                    'type': cat_info['type'],
+                    'category': cat_info['category'],
+                    'subcategory': cat_info['subcategory']
                 })
             
             logger.info(f"Parse regex concluido: {len(transactions)} transacoes")
@@ -185,3 +197,31 @@ class OFXParser:
         except Exception as e:
             logger.error(f"Erro no parse regex: {e}")
             return None
+    
+    def _categorize_ofx_transaction(self, description: str, amount: float) -> dict:
+        """
+        Categoriza transação OFX usando categorize_smart do categorizer
+        
+        Args:
+            description: Descrição da transação
+            amount: Valor da transação
+            
+        Returns:
+            Dict com type, category, subcategory
+        """
+        return self.categorizer.categorize_smart(description, amount)
+
+    def _should_skip_transaction(self, description: str) -> bool:
+        """
+        Ignora lançamentos informativos que alguns bancos colocam como STMTTRN.
+
+        Banco do Brasil exporta "Saldo Anterior" e "Saldo do dia" como se fossem
+        transações OFX, inclusive com valores não-zero. Essas linhas não devem
+        virar lançamentos no ezBookkeeping.
+        """
+        normalized = (description or '').strip().lower()
+        return normalized in {
+            'saldo',
+            'saldo anterior',
+            'saldo do dia',
+        }

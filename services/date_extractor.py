@@ -90,21 +90,75 @@ class DateExtractor:
             logger.warning(f"Erro ao extrair data do nome: {e}")
             return datetime.now().strftime('%m-%Y')
     
-    def parse_ofx_date(self, date_str: str) -> str:
+    def extract_month_year_from_transactions(self, dates: list) -> str:
         """
-        Parse data do OFX (YYYYMMDD) para formato YYYY-MM-DD
+        Extrai mes-ano mais frequente de uma lista de datas
         
         Args:
-            date_str: Data em formato OFX (ex: 20251108)
+            dates: Lista de datas no formato YYYY-MM-DD
             
         Returns:
-            Data formatada YYYY-MM-DD ou string vazia se inválida
+            String no formato 'MM-YYYY' do mes mais frequente
         """
         try:
+            month_year_counts = {}
+            
+            for date_str in dates:
+                try:
+                    # Se tem hora (YYYY-MM-DD HH:MM:SS), pegar apenas a data
+                    date_part = date_str.split(' ')[0] if ' ' in date_str else date_str
+                    
+                    # Parse YYYY-MM-DD
+                    date_obj = datetime.strptime(date_part, '%Y-%m-%d')
+                    month_year = date_obj.strftime('%m-%Y')
+                    month_year_counts[month_year] = month_year_counts.get(month_year, 0) + 1
+                except:
+                    continue
+            
+            # Usar o mes-ano mais frequente
+            if month_year_counts:
+                most_common = max(month_year_counts.items(), key=lambda x: x[1])
+                return most_common[0]
+            
+            # Fallback: mes atual
+            return datetime.now().strftime('%m-%Y')
+            
+        except Exception as e:
+            logger.warning(f"Erro ao extrair mes-ano de transacoes: {e}")
+            return datetime.now().strftime('%m-%Y')
+    
+    def parse_ofx_date(self, date_str: str) -> str:
+        """
+        Parse data do OFX para formato YYYY-MM-DD HH:MM:SS
+        
+        OFX pode ter formatos:
+        - YYYYMMDD (apenas data)
+        - YYYYMMDDHHMMSS (data e hora)
+        - YYYYMMDDHHMMSS[timezone] (data, hora e timezone)
+        
+        Args:
+            date_str: Data em formato OFX (ex: 20251108 ou 20251108120000)
+            
+        Returns:
+            Data formatada YYYY-MM-DD HH:MM:SS ou string vazia se inválida
+        """
+        try:
+            # Remover timezone se presente (ex: [-3:BRT])
+            date_str = date_str.split('[')[0].strip()
+            
             if len(date_str) >= 8:
                 year = int(date_str[0:4])
                 month = int(date_str[4:6])
                 day = int(date_str[6:8])
+                
+                # Extrair hora se disponível (YYYYMMDDHHMMSS)
+                hour = 0
+                minute = 0
+                second = 0
+                if len(date_str) >= 14:
+                    hour = int(date_str[8:10])
+                    minute = int(date_str[10:12])
+                    second = int(date_str[12:14])
                 
                 # Corrigir ano invalido
                 if year < 1900:
@@ -116,8 +170,16 @@ class DateExtractor:
                 if day > 31 or day == 0:
                     day = 1
                 
-                date_obj = datetime(year, month, day)
-                return date_obj.strftime('%Y-%m-%d')
+                # Validar hora
+                if hour > 23:
+                    hour = 0
+                if minute > 59:
+                    minute = 0
+                if second > 59:
+                    second = 0
+                
+                date_obj = datetime(year, month, day, hour, minute, second)
+                return date_obj.strftime('%Y-%m-%d %H:%M:%S')
             
             return ''
         except Exception as e:

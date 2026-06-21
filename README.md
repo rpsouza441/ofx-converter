@@ -1,195 +1,288 @@
-# OFX to QIF Converter v3.0
+# OFX to ezBookkeeping CSV Converter
 
-Conversor automático de arquivos OFX para QIF usando Docker, otimizado para ezBookkeeping.
+Conversor automático de exports bancários para CSV de importação do ezBookkeeping usando Docker.
 
-**Novo v3.0:** Arquitetura modular com categorização configurável via YAML!
+O container monitora `./entrada`, detecta arquivos suportados, escolhe um processor, parseia transações, aplica categorização e pós-processamento, identifica a conta pelo nome do arquivo, gera CSV ezBookkeeping e move o arquivo original para `./entrada/lido/<mes-ano>/`.
+
+## Formatos Suportados
+
+- OFX/QFX
+- Mercado Pago CSV
+- Rico CSV
+- Rico/XP investimento XLSX
+- XP cartão CSV
+- XP conta digital CSV
+- Banco do Brasil CSV
+
+## Arquitetura
+
+```text
+ofx_converter.py
+  Entry point, bootstrap de dependências, watch loop e wrappers de compatibilidade.
+
+services/processor_registry.py
+  Escolhe o processor correto para cada arquivo.
+
+services/processors/
+  Adaptadores por banco/formato. Detectam arquivo e chamam parsers existentes.
+
+services/conversion_pipeline.py
+  Fluxo comum: parse -> mês -> conta -> pós-processamento -> CSV -> mover para lido.
+
+services/transaction_postprocessor.py
+  Ajustes após parse, como regra de pagamento recebido em CC Nubank.
+
+services/*_parser.py
+  Parsers reais de cada banco/formato.
+
+services/ezbookkeeping_csv_writer.py
+  Escrita do CSV compatível com ezBookkeeping.
+```
+
+Documentação complementar:
+
+- [MELHORIA_ARQUITETURA.md](MELHORIA_ARQUITETURA.md)
+- [UML_ARQUITETURA_FINAL.md](UML_ARQUITETURA_FINAL.md)
+- [ARQUITETURA_CONVERSOR_OFX.md](ARQUITETURA_CONVERSOR_OFX.md)
 
 ## Estrutura do Projeto
 
-```
+```text
 ofx-converter/
-├── ofx_converter.py           # Main - orquestra services
-├── services/                  # Services modulares
-│   ├── file_reader.py        # Leitura OFX (auto-detecção encoding)
-│   ├── date_extractor.py     # Extração de mês-ano
-│   ├── text_normalizer.py    # Normalização UTF-8
-│   ├── categorizer.py        # Categorização de transações
-│   └── qif_writer.py         # Escrita de QIF
-├── categorias.yaml           # Regras de categorização (editável!)
+├── ofx_converter.py
+├── services/
+│   ├── conversion_pipeline.py
+│   ├── processor_registry.py
+│   ├── transaction_postprocessor.py
+│   ├── processors/
+│   ├── *_parser.py
+│   ├── categorizer.py
+│   ├── account_matcher.py
+│   ├── date_extractor.py
+│   └── ezbookkeeping_csv_writer.py
+├── categorias.yaml
+├── contas.yaml
 ├── Dockerfile
 ├── docker-compose.yml
-└── README.md
+└── setup.sh
 ```
 
-## Como usar
+## Como Usar
 
-### 1. Configuração inicial
+### 1. Preparar pastas
+
 ```bash
 chmod +x setup.sh
 ./setup.sh
 ```
 
-### 2. Iniciar o conversor
+O `setup.sh` cria as pastas locais usadas pelo compose:
+
+```text
+./entrada
+./entrada/lido
+./convertido
+./logs
+```
+
+### 2. Subir o container
+
 ```bash
 docker compose up -d
 ```
 
-### 3. Usar o conversor
-1. Coloque arquivos `.ofx` na pasta `./entrada/`
-2. O conversor processa automaticamente (verifica a cada 5 segundos)
-3. Arquivos convertidos `.qif` ficam em `./convertido/`
-4. Arquivos processados são movidos para `./entrada/lido/`
+### 3. Processar arquivos
+
+Coloque arquivos suportados em:
+
+```text
+./entrada/
+```
+
+O conversor verifica a pasta a cada `WATCH_INTERVAL` segundos. Quando um arquivo é convertido:
+
+- CSV final vai para `./convertido/<mes-ano>/`
+- arquivo original vai para `./entrada/lido/<mes-ano>/`
+- logs ficam em `./logs/`
 
 ### 4. Ver logs
+
 ```bash
 docker compose logs -f
 ```
 
-### 5. Parar o conversor
+### 5. Parar
+
 ```bash
 docker compose down
 ```
 
-## Funcionalidades v3.0
+## Mapeamento Docker
 
-### Arquitetura Modular 
-- **Services separados** para cada responsabilidade
-- **Fácil manutenção** e extensão
-- **Testável** (cada service pode ser testado independentemente)
+O `docker-compose.yml` monta arquivos/pastas do host dentro do container:
 
-### Categorização Configurável 
-- **Arquivo YAML** com regras de categorização
-- **Adicionar categorias SEM alterar código Python!**
-- Suporte a múltiplas palavras-chave por categoria
+```text
+Host                  Container
+./entrada             /app/entrada
+./entrada/lido        /app/entrada/lido
+./convertido          /app/convertido
+./logs                /app/logs
+./ofx_converter.py    /app/ofx_converter.py
+./services            /app/services
+./categorias.yaml     /app/categorias.yaml
+./contas.yaml         /app/contas.yaml
+```
 
-### Monitoramento Automático 
-- Monitoramento da pasta entrada
-- Conversão OFX → QIF automática
-- Organização por mês-ano
+Por isso mudanças em `ofx_converter.py`, `services/`, `categorias.yaml` e `contas.yaml` são montadas no container. Para dependências ou Dockerfile, faça rebuild.
 
-### Categorização Inteligente 
-- Dividendos/Proventos → "Dividendos"
-- Salário → "Salário"
-- PIX/TED recebidos → "Receitas"
-- PIX/TED enviados → "Transferências"
-- Boletos → "Boletos"
-- Alimentação, Saúde, Combustível, etc.
+## Rebuild no Selfhosted
 
-### Tratamento de Dados 
-- **Normalização UTF-8** (remove acentos automaticamente)
-- **Correção de datas malformadas** (anos inválidos)
-- **Data mais frequente** para organização de pastas
-- **Permissões corretas** (rw-rw-r--)
+```bash
+cd /srv/DATA/ofx-converter
+docker compose down
+docker compose build --no-cache
+docker compose up -d
+docker compose logs -f
+```
 
-## Adicionar/Editar Categorias
+## Testar Depois do Rebuild
 
-Edite o arquivo `categorias.yaml`:
+Verifique container:
+
+```bash
+docker compose ps
+docker compose logs -f ofx-converter
+```
+
+Valide sintaxe dentro do container:
+
+```bash
+docker compose exec ofx-converter python -m py_compile /app/ofx_converter.py /app/services/*.py /app/services/processors/*.py
+```
+
+Teste conversão com cópia de um arquivo pequeno em `./entrada/`. Depois confira:
+
+```text
+./convertido/<mes-ano>/
+./entrada/lido/<mes-ano>/
+./logs/
+```
+
+## Atualizar Categorias
+
+Edite `categorias.yaml`:
 
 ```yaml
 receitas:
   - categoria: Freelance
+    subcategoria: Serviços
     palavras:
       - freelance
       - servico prestado
-      - consultoria
 
 despesas:
   - categoria: Streaming
+    subcategoria: Assinaturas
     palavras:
       - netflix
       - spotify
-      - amazon prime
 ```
 
-Rebuild Docker:
+Depois reinicie:
 
 ```bash
-docker compose down
-docker compose build
-docker compose up -d
+docker compose restart
 ```
 
-Pronto! Suas categorias estão ativas.
+## Atualizar Contas
+
+Edite `contas.yaml` para ajustar identificação de conta pelo nome do arquivo. O `AccountMatcher` usa palavras-chave de titular, banco e tipo para escolher a conta ezBookkeeping.
+
+Depois reinicie:
+
+```bash
+docker compose restart
+```
 
 ## Configurações
 
-Variáveis de ambiente no `docker-compose.yml`:
+Variáveis em `docker-compose.yml`:
 
-- `WATCH_INTERVAL`: Intervalo de verificação em segundos (padrão: 5)
-- `TZ`: Fuso horário (padrão: America/Sao_Paulo)
+- `WATCH_INTERVAL`: intervalo de varredura em segundos. Padrão: `5`.
+- `TZ`: timezone do container. Padrão: `America/Sao_Paulo`.
 
-## Estrutura de Pastas
+Variáveis opcionais de ownership:
 
-```
-ofx-converter/
-├── entrada/           <- Coloque arquivos .ofx aqui
-│   └── lido/         <- Arquivos já processados (organizados por mês)
-│       ├── 10-2025/
-│       └── 11-2025/
-├── convertido/       <- Arquivos .qif prontos (organizados por mês)
-│   ├── 10-2025/
-│   └── 11-2025/
-└── logs/            <- Logs da aplicação
-```
+- `FILE_CHOWN_ENABLED=true`
+- `FILE_CHOWN_UID=1000`
+- `FILE_CHOWN_GID=1000`
 
 ## Troubleshooting
 
 ### Container não inicia
+
 ```bash
 docker compose logs
 ```
 
-### Arquivos não são processados
-- Verifique se os arquivos têm extensão `.ofx` ou `.qfx`
-- Verifique permissões das pastas
-- Veja logs: `docker compose logs -f`
+### Arquivo não processa
 
-### Problema de encoding
-O conversor tenta múltiplos encodings (UTF-8, latin-1, cp1252) automaticamente.
+- Confirme se o arquivo está em `./entrada/`.
+- Confirme se o formato é suportado.
+- Veja logs com `docker compose logs -f`.
+- Verifique se o processor detecta por header ou nome de arquivo.
 
-### Datas inválidas
-Datas malformadas (ex: ano 0002) são automaticamente corrigidas para o ano atual.
+### CSV não aparece
 
-### Categorias não aplicadas
-- Verifique o arquivo `categorias.yaml`
-- Rebuild: `docker compose down && docker compose build && docker compose up -d`
-- Veja logs para erros
+- Veja `./logs/`.
+- Confirme se o arquivo original foi movido para `./entrada/lido/<mes-ano>/`.
+- Se não foi movido, houve erro antes da finalização.
 
-## Atualizar
+### Dependências Python
+
+O Dockerfile instala:
+
+```text
+ofxparse
+pyyaml
+openpyxl
+```
+
+Se rodar local sem Docker, instale:
 
 ```bash
-docker compose down
-docker compose build --no-cache
-docker compose up -d
+pip install ofxparse pyyaml openpyxl
 ```
 
 ## Desenvolvimento
 
-### Executar localmente (sem Docker)
+Rodar localmente:
 
 ```bash
-# Instalar dependências
-pip install ofxparse pyyaml
-
-# Executar
-python ofx_converter.py
+python3 ofx_converter.py
 ```
 
-### Testar Services
+Checar sintaxe:
 
-```python
-from services.categorizer import TransactionCategorizer
-
-categorizer = TransactionCategorizer('categorias.yaml')
-categoria = categorizer.categorize("Salario ord empregador", 1500.00)
-print(categoria)  # Saída: Salário
+```bash
+PYTHONPYCACHEPREFIX=/tmp/ofx_converter_pycache python3 -m py_compile ofx_converter.py services/*.py services/processors/*.py
 ```
+
+Antes de commit:
+
+```bash
+git status --short
+git diff --stat
+```
+
+Evite commitar dados sensíveis de `entrada/`, `convertido/`, `logs/`, `.recycle/` e backups locais.
 
 ## Versões
 
-- **v3.0** - Arquitetura modular com services + categorização via YAML
-- **v2.0** - Organização por mês-ano + correção de datas
-- **v1.0** - Versão inicial
+- Arquitetura atual: pipeline comum + registry + processors por banco/formato.
+- v3.0: services modulares + categorização via YAML.
+- v2.0: organização por mês-ano + correção de datas.
+- v1.0: versão inicial.
 
 ## Licença
 
