@@ -1,0 +1,5 @@
+Time,Timezone,Type,Category,Sub Category,Account,Account Currency,Amount,Account2,Account2 Currency,Account2 Amount,Geographic Location,Tags,Description
+2026-05-13 00:00:00,-03:00,Transfer,Diversos,Outra Transferência,Conta Investimento XP Rodrigo,BRL,56.44,,BRL,56.44,,,TED TER BCO 33 AGE 2271 CTA 13017707 2 - TED APLICACAO FUNDOS Trend Investback I
+2026-05-13 00:00:00,-03:00,Income,Diversos,Outras Receitas,Conta Investimento XP Rodrigo,BRL,56.44,,,,,,Investback
+2026-05-11 00:00:00,-03:00,Transfer,Transferência Geral,Depósitos e Saques,Conta Investimento XP Rodrigo,BRL,54.00,,BRL,54.00,,,TED BCO 348 AGE 1  CTA 12724182  - RETIRADA EM C/C
+2026-06-22 00:00:00,-03:00,Expense,Diversos,Outras Despesas,Conta Investimento XP Rodrigo,BRL,0.00,,,,,,Lancamento

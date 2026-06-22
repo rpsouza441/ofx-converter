@@ -1,0 +1,48 @@
+Phase 1 Baseline Report
+==================================================
+
+[OK] Extrato_banco_do_brasil_052026.ofx
+  Processor: OFX/QFX
+  Account: Banco do Brasil Rodrigo
+  Transactions: 12
+
+[OK] inter_rodrigo_Extrato-01-05-2026-a-31-05-2026-OFX.ofx
+  Processor: OFX/QFX
+  Account: Conta Inter Rodrigo
+  Transactions: 21
+
+[OK] xp_rodrigo_digital_extrato_de_01-05-2026_ate_31-05-2026.ofx
+  Processor: OFX/QFX
+  Account: Conta Digital XP Rodrigo
+  Transactions: 2
+
+[OK] Fatura_xp_2026-06-15.csv
+  Processor: CSV XP CC
+  Account: CC XP Rodrigo
+  Transactions: 36
+
+[OK] rico_carine_digital_extrato_de_01-05-2026_ate_31-05-2026.ofx
+  Processor: OFX/QFX
+  Account: Conta Digital Rico Carine
+  Transactions: 2
+
+[OK] carine_rico_extrato_investimento_de_01-05-2026_ate_31-05-2026.xlsx
+  Processor: XLSX Rico/XP Investimento
+  Account: Conta Investimento Rico Carine
+  Transactions: 14
+
+[OK] rodrigo_nubank_digital_extrato_60330829_01MAI2026_31MAI2026.ofx
+  Processor: OFX/QFX
+  Account: NuConta Rodrigo
+  Transactions: 3
+
+[OK] Nubank_fatura_rodrigo_2026-06-15.ofx
+  Processor: OFX/QFX
+  Account: CC NuBank Rodrigo
+  Transactions: 30
+
+[OK] rodrigo_xp_investimentoextrato_de_01-05-2026_ate_31-05-2026.xlsx
+  Processor: XLSX Rico/XP Investimento
+  Account: Conta Investimento XP Rodrigo
+  Transactions: 4
+

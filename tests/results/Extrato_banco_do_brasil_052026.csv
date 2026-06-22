@@ -1,0 +1,13 @@
+Time,Timezone,Type,Category,Sub Category,Account,Account Currency,Amount,Account2,Account2 Currency,Account2 Amount,Geographic Location,Tags,Description
+2026-05-04 00:00:00,-03:00,Income,Diversos,Outras Receitas,Banco do Brasil Rodrigo,BRL,175.00,,,,,,Transacao recebida - 04/05 15:45 A7 TECHNOLOGY BUSINESS
+2026-05-05 00:00:00,-03:00,Expense,Diversos,Outras Despesas,Banco do Brasil Rodrigo,BRL,175.00,,,,,,Pix - Enviado - 05/05 23:27 Carine Pereira Santos
+2026-05-11 00:00:00,-03:00,Income,Diversos,Outras Receitas,Banco do Brasil Rodrigo,BRL,175.00,,,,,,Transacao recebida - 11/05 15:54 A7 TECHNOLOGY BUSINESS
+2026-05-11 00:00:00,-03:00,Expense,Diversos,Outras Despesas,Banco do Brasil Rodrigo,BRL,175.00,,,,,,Pix - Enviado - 11/05 20:56 Carine Pereira Santos
+2026-05-12 00:00:00,-03:00,Income,Ganhos Ocupacionais,Renda de Salário,Banco do Brasil Rodrigo,BRL,3915.96,,,,,,Salario ord empregador
+2026-05-12 00:00:00,-03:00,Expense,Diversos,Outras Despesas,Banco do Brasil Rodrigo,BRL,2988.76,,,,,,Pagamento de Boleto - BANCO XP S.A
+2026-05-12 00:00:00,-03:00,Expense,Moradia e Utensílios Domésticos,Despesa de Utilidades,Banco do Brasil Rodrigo,BRL,230.53,,,,,,Pix - Enviado - 12/05 19:29 COPEL-DIS
+2026-05-12 00:00:00,-03:00,Expense,Diversos,Outras Despesas,Banco do Brasil Rodrigo,BRL,696.67,,,,,,Pix - Enviado - 12/05 19:39 Carine Pereira Santos
+2026-05-18 00:00:00,-03:00,Income,Diversos,Outras Receitas,Banco do Brasil Rodrigo,BRL,210.00,,,,,,Transacao recebida - 18/05 16:19 A7 TECHNOLOGY BUSINESS
+2026-05-19 00:00:00,-03:00,Expense,Diversos,Outras Despesas,Banco do Brasil Rodrigo,BRL,210.00,,,,,,Pix - Enviado - 19/05 14:08 Carine Pereira Santos
+2026-05-27 00:00:00,-03:00,Income,Diversos,Outras Receitas,Banco do Brasil Rodrigo,BRL,210.00,,,,,,Transacao recebida - 27/05 13:53 A7 TECHNOLOGY BUSINESS
+2026-05-28 00:00:00,-03:00,Expense,Diversos,Outras Despesas,Banco do Brasil Rodrigo,BRL,210.00,,,,,,Pix - Enviado - 28/05 10:01 Carine Pereira Santos

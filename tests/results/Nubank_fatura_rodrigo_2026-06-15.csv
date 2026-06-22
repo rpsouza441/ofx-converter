@@ -1,0 +1,31 @@
+Time,Timezone,Type,Category,Sub Category,Account,Account Currency,Amount,Account2,Account2 Currency,Account2 Amount,Geographic Location,Tags,Description
+2026-06-07 00:00:00,-03:00,Expense,Diversos,Outras Despesas,CC NuBank Rodrigo,BRL,14.20,,,,,,Dl*Uberrides
+2026-06-07 00:00:00,-03:00,Expense,Comida e Bebida,Comida,CC NuBank Rodrigo,BRL,10.98,,,,,,99food *Jl Pizzaria
+2026-06-06 00:00:00,-03:00,Expense,Diversos,Outras Despesas,CC NuBank Rodrigo,BRL,9.68,,,,,,99app *99app
+2026-06-06 00:00:00,-03:00,Expense,Diversos,Outras Despesas,CC NuBank Rodrigo,BRL,12.96,,,,,,Dl*Uberrides
+2026-06-05 00:00:00,-03:00,Expense,Comida e Bebida,Comida,CC NuBank Rodrigo,BRL,22.03,,,,,,Ifd*Lebatata Alimentos
+2026-06-04 00:00:00,-03:00,Expense,Comida e Bebida,Comida,CC NuBank Rodrigo,BRL,3.39,,,,,,Festval Rep Argentina
+2026-05-31 00:00:00,-03:00,Expense,Comida e Bebida,Comida,CC NuBank Rodrigo,BRL,42.00,,,,,,99food *50.365.057 Dan
+2026-05-31 00:00:00,-03:00,Expense,Moradia e Utensílios Domésticos,Despesa de Utilidades,CC NuBank Rodrigo,BRL,30.50,,,,,,"Openrouter, Inc"
+2026-05-31 00:00:00,-03:00,Expense,Moradia e Utensílios Domésticos,Despesa de Utilidades,CC NuBank Rodrigo,BRL,1.06,,,,,,"IOF de ""Openrouter, Inc"""
+2026-05-28 00:00:00,-03:00,Expense,Comida e Bebida,Bebida,CC NuBank Rodrigo,BRL,42.00,,,,,,Bar do Gilmar
+2026-05-25 00:00:00,-03:00,Expense,Comida e Bebida,Comida,CC NuBank Rodrigo,BRL,125.97,,,,,,99food *58.791.580 Giu
+2026-05-23 00:00:00,-03:00,Expense,Comida e Bebida,Comida,CC NuBank Rodrigo,BRL,45.68,,,,,,99food *Aji Sushi
+2026-05-22 00:00:00,-03:00,Income,Ganhos Ocupacionais,Estorno,CC NuBank Rodrigo,BRL,23.77,,,,,,"Estorno de ""Ifd*Cia Beal de Alimen"" (Ifd*Cia Beal de Alimen)"
+2026-05-21 00:00:00,-03:00,Expense,Comida e Bebida,Comida,CC NuBank Rodrigo,BRL,29.35,,,,,,Ifd*Cia Beal de Alimen
+2026-05-21 00:00:00,-03:00,Income,Ganhos Ocupacionais,Estorno,CC NuBank Rodrigo,BRL,18.71,,,,,,"Estorno de ""Dl *Aliexpress Br Alip"" (AliExpress)"
+2026-05-16 00:00:00,-03:00,Expense,Comida e Bebida,Comida,CC NuBank Rodrigo,BRL,10.98,,,,,,99food *Jl Pizzaria
+2026-05-16 00:00:00,-03:00,Expense,Comida e Bebida,Comida,CC NuBank Rodrigo,BRL,4.78,,,,,,Festval Rep Argentina
+2026-05-15 00:00:00,-03:00,Expense,Finanças & Seguro,Despesa com Juros,CC NuBank Rodrigo,BRL,0.90,,,,,,"IOF de ""Google*Chrome"""
+2026-05-15 00:00:00,-03:00,Expense,Diversos,Outras Despesas,CC NuBank Rodrigo,BRL,25.90,,,,,,Google*Chrome
+2026-05-12 00:00:00,-03:00,Expense,Diversos,Outras Despesas,CC NuBank Rodrigo,BRL,72.12,,,,,,Dl *Aliexpress Br Alip
+2026-05-12 00:00:00,-03:00,Transfer,Transferência Geral,Pagamento de Cartão de Crédito,CC NuBank Rodrigo,BRL,620.00,,BRL,620.00,,,Pagamento recebido
+2026-05-10 00:00:00,-03:00,Income,Ganhos Ocupacionais,Estorno,CC NuBank Rodrigo,BRL,31.96,,,,,,"Estorno de ""99food *Ongaratto e Bo"" (99 Food)"
+2026-05-10 00:00:00,-03:00,Expense,Comida e Bebida,Comida,CC NuBank Rodrigo,BRL,22.31,,,,,,99food *Buffet Dona Ma
+2026-05-10 00:00:00,-03:00,Expense,Comida e Bebida,Comida,CC NuBank Rodrigo,BRL,10.98,,,,,,99food *Kennedy Point
+2026-05-10 00:00:00,-03:00,Expense,Diversos,Outras Despesas,CC NuBank Rodrigo,BRL,12.94,,,,,,Dl *Uberrides
+2026-05-10 00:00:00,-03:00,Income,Ganhos Ocupacionais,Estorno,CC NuBank Rodrigo,BRL,10.98,,,,,,"Estorno de ""99food *Ar Comercio de"" (99 Food)"
+2026-05-10 00:00:00,-03:00,Expense,Comida e Bebida,Comida,CC NuBank Rodrigo,BRL,31.96,,,,,,99food *Ongaratto e Bo
+2026-05-10 00:00:00,-03:00,Expense,Comida e Bebida,Comida,CC NuBank Rodrigo,BRL,10.98,,,,,,99food *Saint Honore C
+2026-05-09 00:00:00,-03:00,Expense,Comida e Bebida,Comida,CC NuBank Rodrigo,BRL,10.98,,,,,,99food *Ar Comercio de
+2026-05-08 00:00:00,-03:00,Expense,Entretenimento,Despesa com Animais de Estimação,CC NuBank Rodrigo,BRL,305.00,,,,,,Jim.Com* Pata Limpa - Parcela 3/6
